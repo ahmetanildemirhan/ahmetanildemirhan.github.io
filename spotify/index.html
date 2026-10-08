@@ -71,25 +71,63 @@
       <section class="block" id="explore">
         <p class="eyebrow">Ara ve keşfet</p>
         <h2 class="display">Geçmişinin içinde ara.</h2>
-        <p class="intro-text">Bir şarkı ya da sanatçı yaz, istersen tarih aralığı seç. Listelerdeki bir isme dokunarak da arayabilirsin.</p>
+        <p class="intro-text">Bir şarkı, sanatçı ya da albüm yaz; yıla, aya, saate, cihaza, ülkeye ve daha fazlasına göre süz. Filtreleri birlikte kullanabilirsin. Listelerdeki bir isme dokunarak da arayabilirsin.</p>
         <div class="x-box">
           <div class="x-filters">
-            <input type="search" id="xq" placeholder="Şarkı ya da sanatçı ara…" aria-label="Şarkı ya da sanatçı ara" autocomplete="off">
+            <input type="search" id="xq" placeholder="Şarkı, sanatçı ya da albüm ara…" aria-label="Ara" autocomplete="off">
+            <label>Nerede
+              <select id="xField">
+                <option value="all">Her yerde</option>
+                <option value="track">Şarkı adında</option>
+                <option value="artist">Sanatçıda</option>
+                <option value="album">Albümde</option>
+              </select>
+            </label>
             <label>Başlangıç <input type="date" id="xFrom"></label>
             <label>Bitiş <input type="date" id="xTo"></label>
           </div>
           <div class="x-chips">
-            <button type="button" class="chip" id="xToday">Geçmiş yıllarda bugün</button>
+            <button type="button" class="chip" id="xToday" aria-pressed="false">Geçmiş yıllarda bugün</button>
+            <button type="button" class="chip" id="xFirsts" aria-pressed="false">Sadece ilk dinleyişler</button>
             <label class="chip check"><input type="checkbox" id="xShort"> 30 saniyeden kısa çalmaları da göster</label>
-            <button type="button" class="chip ghost" id="xClear">Temizle</button>
+            <button type="button" class="chip ghost" id="xClear">Tüm filtreleri temizle</button>
           </div>
+          <details class="x-panel">
+            <summary>Daha fazla filtre <span id="xMoreCount"></span></summary>
+            <div class="x-groups">
+              <div class="x-group wide"><h4>Yıl</h4><div class="chips" id="fYear"></div></div>
+              <div class="x-group wide"><h4>Ay</h4><div class="chips" id="fMonth"></div></div>
+              <div class="x-group"><h4>Haftanın günü</h4><div class="chips" id="fDay"></div></div>
+              <div class="x-group"><h4>Saat aralığı</h4>
+                <div class="x-row"><select id="fHourFrom" aria-label="Başlangıç saati"></select><span>–</span><select id="fHourTo" aria-label="Bitiş saati"></select></div>
+                <p class="hint">Gece yarısını geçebilir: 22:00 – 04:59 gibi.</p>
+              </div>
+              <div class="x-group"><h4>Cihaz</h4><div class="chips" id="fDevice"></div></div>
+              <div class="x-group"><h4>Ülke</h4><div class="chips" id="fCountry"></div></div>
+              <div class="x-group"><h4>Şarkı nasıl başladı</h4><div class="chips" id="fStart"></div></div>
+              <div class="x-group"><h4>Şarkı nasıl bitti</h4><div class="chips" id="fEnd"></div></div>
+              <div class="x-group"><h4>Çalma şekli</h4>
+                <label class="x-sel">Karışık çalma <select id="fShuffle"><option value="">Hepsi</option><option value="1">Açık</option><option value="0">Kapalı</option></select></label>
+                <label class="x-sel">Çevrimdışı <select id="fOffline"><option value="">Hepsi</option><option value="1">Evet</option><option value="0">Hayır</option></select></label>
+                <label class="x-sel">Gizli oturum <select id="fIncognito"><option value="">Hepsi</option><option value="1">Evet</option><option value="0">Hayır</option></select></label>
+              </div>
+              <div class="x-group"><h4>Şarkıyı toplamda kaç kez dinlemişim</h4>
+                <select id="fCount" aria-label="Toplam dinlenme sayısı"></select>
+                <p class="hint">"Sadece 1 kez" bir kere dinleyip bir daha açmadıklarını bulur.</p>
+              </div>
+            </div>
+          </details>
           <div class="x-stats" id="xStats"></div>
           <div class="x-chart" id="xChart"></div>
           <div class="x-tops">
             <div><h3>Sanatçılar</h3><ol class="rank" id="xArtists"></ol></div>
             <div><h3>Şarkılar</h3><ol class="rank" id="xTracks"></ol></div>
           </div>
-          <h3>Dinlemeler</h3>
+          <div class="x-head">
+            <h3>Dinlemeler</h3>
+            <select id="xSort" aria-label="Sıralama"><option value="new">Yeniden eskiye</option><option value="old">Eskiden yeniye</option></select>
+            <button type="button" class="chip" id="xCsv">Excel'e aktar (CSV)</button>
+          </div>
           <ol class="x-plays" id="xPlays"></ol>
           <button type="button" class="btn" id="xMore">Daha fazla göster</button>
         </div>

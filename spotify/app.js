@@ -126,7 +126,9 @@
             var ms = +r.ms_played || 0;
             extended.push({
               t: t, ms: ms, track: r.master_metadata_track_name, artist: r.master_metadata_album_artist_name || "Bilinmeyen sanatçı",
-              skip: ms < MIN_PLAY && (r.skipped === true || r.reason_end === "fwdbtn")
+              album: r.master_metadata_album_album_name || "", skip: ms < MIN_PLAY && (r.skipped === true || r.reason_end === "fwdbtn"),
+              platform: r.platform || "", country: r.conn_country || "", rs: r.reason_start || "", re: r.reason_end || "",
+              shuffle: r.shuffle === true, offline: r.offline === true, incognito: r.incognito_mode === true
             });
           } else if (r.episode_name || r.episode_show_name || r.audiobook_title) {
             extended.push({ t: t, ms: +r.ms_played || 0, pod: true });
@@ -194,10 +196,15 @@
         var ar = artists[idx];
         var ti = Math.floor(Math.pow(rnd(), 1.8) * ar.tracks.length);
         var skipped = rnd() < 0.2;
+        var r1 = rnd();
         out.push({
           t: start + d * 864e5 + pickHour() * HOUR + Math.floor(rnd() * HOUR),
           ms: skipped ? Math.floor(rnd() * 25000) : Math.floor(150000 + rnd() * 110000),
-          track: ar.tracks[ti], artist: ar.name, skip: skipped
+          track: ar.tracks[ti], artist: ar.name, album: ar.name + " (Albüm)", skip: skipped,
+          platform: r1 < 0.55 ? "iOS 12.1 (iPhone10,6)" : r1 < 0.8 ? "OS X 10.14 [x86 8]" : r1 < 0.92 ? "Partner SCEI sony_tv ps4" : "web_player windows 10",
+          country: rnd() < 0.97 ? "TR" : ["DE", "GB", "IT"][Math.floor(rnd() * 3)],
+          rs: skipped ? "fwdbtn" : rnd() < 0.5 ? "clickrow" : "trackdone", re: skipped ? "fwdbtn" : rnd() < 0.6 ? "trackdone" : "endplay",
+          shuffle: rnd() < 0.2, offline: rnd() < 0.05, incognito: false
         });
       }
       if (rnd() < 0.15) out.push({ t: start + d * 864e5 + 8 * HOUR, ms: Math.floor(600000 + rnd() * 2400000), pod: true });
@@ -746,20 +753,84 @@
 
   /* ---------- Search & explore ---------- */
 
-  // Every music play in compact columns: times (seconds), durations and an
-  // index into a track list. 13 years fit in a few megabytes this way.
+  // Spotify's raw platform strings ("iOS 9.1 (iPhone7,2)", "Partner SCEI sony_tv ps4"…)
+  // boiled down to a device someone would recognise.
+  function deviceOf(p) {
+    p = String(p || "").toLowerCase();
+    if (!p || p === "not applicable") return "Bilinmiyor";
+    if (/scei|playstation|ps4|ps5/.test(p)) return "PlayStation";
+    if (/xbox/.test(p)) return "Xbox";
+    if (/tizen|webos|roku|android_tv|android tv|smart ?tv|_tv|\btv\b/.test(p)) return "Akıllı TV";
+    if (/cast|google home|sonos|alexa|echo|speaker|bose/.test(p)) return "Hoparlör / Cast";
+    if (/watch|wear/.test(p)) return "Saat";
+    if (/ipad/.test(p)) return "iPad";
+    if (/ios|iphone/.test(p)) return "iPhone";
+    if (/android-tablet/.test(p)) return "Android tablet";
+    if (/android/.test(p)) return "Android";
+    if (/windows phone/.test(p)) return "Windows Phone";
+    if (/windows/.test(p) && !/web/.test(p)) return "Windows";
+    if (/os x|osx|macos|mac os/.test(p)) return "Mac";
+    if (/web/.test(p)) return "Web";
+    if (/linux/.test(p)) return "Linux";
+    return "Diğer";
+  }
+  var STARTS = ["Kendin seçtin", "Bir önceki bitince", "İleri tuşuyla", "Geri tuşuyla", "Uygulama açılınca", "Başka cihazdan", "Diğer"];
+  function startOf(r) {
+    if (/^(clickrow|click-row|clickside|playbtn|uriopen)$/.test(r)) return 0;
+    if (r === "trackdone") return 1;
+    if (r === "fwdbtn") return 2;
+    if (r === "backbtn") return 3;
+    if (r === "appload" || r === "persisted") return 4;
+    if (r === "remote") return 5;
+    return 6;
+  }
+  var ENDS = ["Sonuna kadar dinledin", "İleri geçtin", "Geri döndün", "Başka bir şey açtın", "Uygulama kapandı", "Diğer"];
+  function endOf(r) {
+    if (r === "trackdone") return 0;
+    if (r === "fwdbtn") return 1;
+    if (r === "backbtn") return 2;
+    if (r === "endplay" || r === "clickrow" || r === "click-row" || r === "remote") return 3;
+    if (/^(logout|unexpected-exit|unexpected-exit-while-paused)$/.test(r)) return 4;
+    return 5;
+  }
+  var regionNames = null;
+  try { regionNames = new Intl.DisplayNames(["tr"], { type: "region" }); } catch (e) {}
+  function countryName(cc) {
+    if (!cc || cc === "ZZ" || cc === "--" || cc === "EU") return "Bilinmiyor";
+    try { return (regionNames && regionNames.of(cc)) || cc; } catch (e) { return cc; }
+  }
+
+  // Every music play in compact columns (times in seconds, durations, an index
+  // into a track list, and small codes for device, country and how it started
+  // and ended). 13 years fit in a few megabytes this way.
+  var PLAYS_VERSION = 2;
   function encodePlays(records) {
     var music = records.filter(function (r) { return !r.pod; });
-    var artistIdx = new Map(), trackIdx = new Map(), artists = [], tracks = [];
-    var n = music.length, t = new Uint32Array(n), ms = new Uint32Array(n), tr = new Uint32Array(n);
+    var n = music.length;
+    var P = {
+      v: PLAYS_VERSION, artists: [], albums: [], tracks: [], devices: [], countries: [],
+      t: new Uint32Array(n), ms: new Uint32Array(n), tr: new Uint32Array(n),
+      dev: new Uint8Array(n), cc: new Uint8Array(n), rs: new Uint8Array(n), re: new Uint8Array(n), fl: new Uint8Array(n)
+    };
+    var idx = { artists: new Map(), albums: new Map(), tracks: new Map(), devices: new Map(), countries: new Map() };
+    function code(kind, key, make) {
+      var m = idx[kind], v = m.get(key);
+      if (v === undefined) { v = P[kind].length; P[kind].push(make ? make() : key); m.set(key, v); }
+      return v;
+    }
     music.forEach(function (r, i) {
-      var a = artistIdx.get(r.artist);
-      if (a === undefined) { a = artists.length; artists.push(r.artist); artistIdx.set(r.artist, a); }
-      var key = r.track + "\u0001" + r.artist, k = trackIdx.get(key);
-      if (k === undefined) { k = tracks.length; tracks.push([r.track, a]); trackIdx.set(key, k); }
-      t[i] = Math.floor(r.t / 1000); ms[i] = Math.min(r.ms, 4294967295); tr[i] = k;
+      var a = code("artists", r.artist);
+      var al = code("albums", r.album || "");
+      P.t[i] = Math.floor(r.t / 1000);
+      P.ms[i] = Math.min(r.ms, 4294967295);
+      P.tr[i] = code("tracks", r.track + "\u0001" + r.artist, function () { return [r.track, a, al]; });
+      P.dev[i] = Math.min(255, code("devices", deviceOf(r.platform)));
+      P.cc[i] = Math.min(255, code("countries", countryName(r.country)));
+      P.rs[i] = r.rs === undefined ? 6 : startOf(r.rs);
+      P.re[i] = r.re === undefined ? 5 : endOf(r.re);
+      P.fl[i] = (r.shuffle ? 1 : 0) | (r.offline ? 2 : 0) | (r.incognito ? 4 : 0);
     });
-    return { artists: artists, tracks: tracks, t: t, ms: ms, tr: tr };
+    return P;
   }
 
   // Saved on this device only (IndexedDB), so the page can reopen without a file.
@@ -791,60 +862,167 @@
   var explorer = (function () {
     var box = $("explore");
     if (!box) return { load: function () {}, search: function () {} };
-    var P = null, fold = null, md = null, today = false, shown = 0, hits = null;
-    var PAGE = 25;
+    var P = null, hits = [], shown = 0, PAGE = 25;
+    // Per-play columns derived once: local year, month, weekday, hour and month-day.
+    var yr, mon, wd, hr, md, foldTrack, foldArtist, foldAlbum, trackTotal, firstPlay;
+    var MONTHS_SHORT = MONTHS.map(function (m) { return m.slice(0, 3); });
+    var LISTEN_COUNTS = [
+      ["", "Hepsi"], ["1", "Sadece 1 kez"], ["2-4", "2–4 kez"], ["5-", "5 ve üstü"], ["20-", "20 ve üstü"], ["50-", "50 ve üstü"], ["100-", "100 ve üstü"]
+    ];
 
     function norm(x) {
-      return String(x).toLocaleLowerCase("tr").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ı/g, "i");
+      return String(x).toLocaleLowerCase("tr").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ı/g, "i");
     }
 
     function load(plays) {
       P = plays;
-      fold = P.tracks.map(function (tk) { return norm(tk[0] + " \u0001 " + P.artists[tk[1]]); });
-      md = null;
+      var n = P.t.length;
+      yr = new Uint16Array(n); mon = new Uint8Array(n); wd = new Uint8Array(n); hr = new Uint8Array(n); md = new Uint16Array(n);
+      for (var i = 0; i < n; i++) {
+        var d = new Date(P.t[i] * 1000);
+        yr[i] = d.getFullYear(); mon[i] = d.getMonth(); wd[i] = (d.getDay() + 6) % 7; hr[i] = d.getHours();
+        md[i] = (d.getMonth() + 1) * 100 + d.getDate();
+      }
+      foldTrack = P.tracks.map(function (tk) { return norm(tk[0]); });
+      foldArtist = P.artists.map(norm);
+      foldAlbum = P.albums.map(norm);
+      // How often each track was played in total, and the first proper play of it.
+      trackTotal = new Uint32Array(P.tracks.length);
+      firstPlay = new Uint8Array(n);
+      var seen = new Uint8Array(P.tracks.length);
+      for (var j = 0; j < n; j++) {
+        if (P.ms[j] < MIN_PLAY) continue;
+        var k = P.tr[j];
+        trackTotal[k]++;
+        if (!seen[k]) { seen[k] = 1; firstPlay[j] = 1; }
+      }
+      buildChoices();
       document.body.classList.add("can-search");
       clear();
     }
 
+    function countBy(col, size) {
+      var c = new Uint32Array(size);
+      for (var i = 0; i < col.length; i++) c[col[i]]++;
+      return c;
+    }
+    function chips(id, items) {
+      $(id).innerHTML = items.map(function (it) {
+        return '<button type="button" class="chip" data-v="' + it[0] + '" aria-pressed="false">' + esc(it[1]) +
+          (it[2] !== undefined ? ' <small>' + nf.format(it[2]) + '</small>' : "") + '</button>';
+      }).join("");
+    }
+    function byCount(labels, counts) {
+      return labels.map(function (l, i) { return [i, l, counts[i]]; })
+        .filter(function (x) { return x[2] > 0; })
+        .sort(function (a, b) { return b[2] - a[2]; });
+    }
+
+    function buildChoices() {
+      var years = [];
+      for (var y = yr[0]; y <= yr[yr.length - 1]; y++) years.push([y, String(y)]);
+      chips("fYear", years);
+      chips("fMonth", MONTHS_SHORT.map(function (m, i) { return [i, m]; }));
+      chips("fDay", DAYS.map(function (d, i) { return [i, d]; }));
+      chips("fDevice", byCount(P.devices, countBy(P.dev, P.devices.length)));
+      chips("fCountry", byCount(P.countries, countBy(P.cc, P.countries.length)));
+      chips("fStart", byCount(STARTS, countBy(P.rs, STARTS.length)));
+      chips("fEnd", byCount(ENDS, countBy(P.re, ENDS.length)));
+      var hours = "";
+      for (var h = 0; h < 24; h++) hours += '<option value="' + h + '">' + String(h).padStart(2, "0") + ':00</option>';
+      $("fHourFrom").innerHTML = hours;
+      $("fHourTo").innerHTML = hours.replace(/:00</g, ":59<");
+      $("fCount").innerHTML = LISTEN_COUNTS.map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join("");
+    }
+
+    function picked(id) {
+      var set = null;
+      $(id).querySelectorAll('[aria-pressed="true"]').forEach(function (b) { (set = set || {})[b.dataset.v] = 1; });
+      return set;
+    }
+    function tri(id) { var v = $(id).value; return v === "" ? null : v === "1"; }
     function dayStart(v) { if (!v) return null; var p = v.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]).getTime() / 1000; }
+
+    function readFilters() {
+      var F = {
+        q: norm($("xq").value.trim()), field: $("xField").value,
+        from: dayStart($("xFrom").value), to: dayStart($("xTo").value),
+        today: $("xToday").getAttribute("aria-pressed") === "true",
+        firsts: $("xFirsts").getAttribute("aria-pressed") === "true",
+        short: $("xShort").checked,
+        years: picked("fYear"), months: picked("fMonth"), days: picked("fDay"),
+        devices: picked("fDevice"), countries: picked("fCountry"), starts: picked("fStart"), ends: picked("fEnd"),
+        hFrom: +$("fHourFrom").value, hTo: +$("fHourTo").value,
+        shuffle: tri("fShuffle"), offline: tri("fOffline"), incognito: tri("fIncognito"),
+        count: $("fCount").value
+      };
+      if (F.to !== null) F.to += 86400 - 1;
+      return F;
+    }
 
     function run() {
       if (!P) return;
-      var q = norm($("xq").value.trim());
-      var from = dayStart($("xFrom").value), to = dayStart($("xTo").value);
-      if (to !== null) to += 86400 - 1;
-      var showShort = $("xShort").checked;
-      var match = null;
-      if (q) {
-        match = new Uint8Array(P.tracks.length);
-        for (var k = 0; k < fold.length; k++) if (fold[k].indexOf(q) >= 0) match[k] = 1;
-      }
-      var todayMD = 0;
-      if (today) {
-        var now = new Date();
-        todayMD = (now.getMonth() + 1) * 100 + now.getDate();
-        if (!md) {
-          md = new Uint16Array(P.t.length);
-          for (var j = 0; j < P.t.length; j++) { var d = new Date(P.t[j] * 1000); md[j] = (d.getMonth() + 1) * 100 + d.getDate(); }
+      var F = readFilters();
+      var nT = P.tracks.length, match = null;
+      if (F.q) {
+        match = new Uint8Array(nT);
+        for (var k = 0; k < nT; k++) {
+          var tk = P.tracks[k];
+          var hit = (F.field !== "artist" && F.field !== "album" && foldTrack[k].indexOf(F.q) >= 0) ||
+            (F.field !== "track" && F.field !== "album" && foldArtist[tk[1]].indexOf(F.q) >= 0) ||
+            ((F.field === "album" || F.field === "all") && foldAlbum[tk[2]].indexOf(F.q) >= 0);
+          if (hit) match[k] = 1;
         }
       }
+      var cMin = 0, cMax = Infinity;
+      if (F.count) { var cp = F.count.split("-"); cMin = +cp[0]; cMax = cp.length > 1 ? (cp[1] ? +cp[1] : Infinity) : cMin; }
+      var allHours = F.hFrom === 0 && F.hTo === 23;
+      var todayMD = 0;
+      if (F.today) { var now = new Date(); todayMD = (now.getMonth() + 1) * 100 + now.getDate(); }
+
       var out = [];
       for (var i = 0; i < P.t.length; i++) {
-        if (!showShort && P.ms[i] < MIN_PLAY) continue;
-        if (match && !match[P.tr[i]]) continue;
-        if (from !== null && P.t[i] < from) continue;
-        if (to !== null && P.t[i] > to) continue;
-        if (today && md[i] !== todayMD) continue;
+        if (!F.short && P.ms[i] < MIN_PLAY) continue;
+        var k2 = P.tr[i];
+        if (match && !match[k2]) continue;
+        if (F.from !== null && P.t[i] < F.from) continue;
+        if (F.to !== null && P.t[i] > F.to) continue;
+        if (F.today && md[i] !== todayMD) continue;
+        if (F.firsts && !firstPlay[i]) continue;
+        if (F.years && !F.years[yr[i]]) continue;
+        if (F.months && !F.months[mon[i]]) continue;
+        if (F.days && !F.days[wd[i]]) continue;
+        if (!allHours) {
+          var h = hr[i];
+          if (F.hFrom <= F.hTo ? (h < F.hFrom || h > F.hTo) : (h < F.hFrom && h > F.hTo)) continue;
+        }
+        if (F.devices && !F.devices[P.dev[i]]) continue;
+        if (F.countries && !F.countries[P.cc[i]]) continue;
+        if (F.starts && !F.starts[P.rs[i]]) continue;
+        if (F.ends && !F.ends[P.re[i]]) continue;
+        if (F.shuffle !== null && !!(P.fl[i] & 1) !== F.shuffle) continue;
+        if (F.offline !== null && !!(P.fl[i] & 2) !== F.offline) continue;
+        if (F.incognito !== null && !!(P.fl[i] & 4) !== F.incognito) continue;
+        if (F.count && (trackTotal[k2] < cMin || trackTotal[k2] > cMax)) continue;
         out.push(i);
       }
       hits = out;
+      showActive(F);
       renderResults();
+    }
+
+    // How many of the extra filters are on, shown on the "more filters" toggle.
+    function showActive(F) {
+      var n = ["years", "months", "days", "devices", "countries", "starts", "ends"].filter(function (k) { return F[k]; }).length +
+        (F.hFrom !== 0 || F.hTo !== 23 ? 1 : 0) + ["shuffle", "offline", "incognito"].filter(function (k) { return F[k] !== null; }).length +
+        (F.count ? 1 : 0);
+      $("xMoreCount").textContent = n ? n + " açık" : "";
     }
 
     function renderResults() {
       var n = hits.length;
       if (!n) {
-        $("xStats").innerHTML = '<p class="x-empty">Bu filtreyle eşleşen bir dinleme yok.</p>';
+        $("xStats").innerHTML = '<p class="x-empty">Bu filtrelerle eşleşen bir dinleme yok.</p>';
         ["xChart", "xArtists", "xTracks", "xPlays"].forEach(function (id) { $(id).innerHTML = ""; });
         $("xMore").classList.add("hidden");
         return;
@@ -887,7 +1065,7 @@
       more();
     }
 
-    // Plays per day for short ranges, per month otherwise. Bars are clickable.
+    // Listening per day for short spans, per month otherwise. Bars are clickable.
     function renderChart(first, last) {
       var a = new Date(first), b = new Date(last);
       var byDay = (last - first) / 864e5 <= 92;
@@ -922,7 +1100,7 @@
         if (!btn) return;
         var dt = binDate(+btn.dataset.bin);
         var end = byDay ? dt : new Date(dt.getFullYear(), dt.getMonth() + 1, 0);
-        setToday(false);
+        $("xToday").setAttribute("aria-pressed", "false");
         $("xFrom").value = iso(dt); $("xTo").value = iso(end);
         run();
       };
@@ -931,19 +1109,26 @@
     function iso(d) {
       return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
     }
+    function playAt(j) { return $("xSort").value === "old" ? hits[j] : hits[hits.length - 1 - j]; }
+    function whenOf(i) {
+      var d = new Date(P.t[i] * 1000);
+      return d.getDate() + " " + MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear() + " · " +
+        String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }
+    function durOf(ms) { return Math.floor(ms / 60000) + ":" + String(Math.floor(ms / 1000) % 60).padStart(2, "0"); }
 
     function more() {
       var html = "";
       var end = Math.min(hits.length, shown + PAGE);
       for (var j = shown; j < end; j++) {
-        var i = hits[hits.length - 1 - j]; // newest first
-        var d = new Date(P.t[i] * 1000), k = P.tr[i], dur = P.ms[i];
-        var when = d.getDate() + " " + MONTHS[d.getMonth()].slice(0, 3) + " " + d.getFullYear() + " · " +
-          String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
-        var mm = Math.floor(dur / 60000), ss = Math.floor(dur / 1000) % 60;
-        html += '<li class="' + (dur < MIN_PLAY ? "short" : "") + '"><span class="when">' + when + '</span>' +
-          '<span class="what">' + esc(P.tracks[k][0]) + ' <span>— ' + esc(P.artists[P.tracks[k][1]]) + '</span></span>' +
-          '<span class="dur">' + mm + ":" + String(ss).padStart(2, "0") + '</span></li>';
+        var i = playAt(j), k = P.tr[i], dur = P.ms[i];
+        var tags = [P.devices[P.dev[i]]];
+        if (P.countries[P.cc[i]] !== "Türkiye" && P.countries[P.cc[i]] !== "Bilinmiyor") tags.push(P.countries[P.cc[i]]);
+        if (firstPlay[i]) tags.unshift("İlk dinleyiş");
+        html += '<li class="' + (dur < MIN_PLAY ? "short" : "") + '"><span class="when">' + whenOf(i) + '</span>' +
+          '<span class="what">' + esc(P.tracks[k][0]) + ' <span>— ' + esc(P.artists[P.tracks[k][1]]) + '</span>' +
+          '<em>' + esc(tags.join(" · ")) + '</em></span>' +
+          '<span class="dur">' + durOf(dur) + '</span></li>';
       }
       $("xPlays").insertAdjacentHTML("beforeend", html);
       shown = end;
@@ -951,25 +1136,54 @@
       $("xMore").textContent = "Daha fazla göster (" + nf.format(hits.length - shown) + " kaldı)";
     }
 
-    function setToday(on) {
-      today = on;
-      $("xToday").setAttribute("aria-pressed", on ? "true" : "false");
-      if (on) { $("xFrom").value = ""; $("xTo").value = ""; }
+    // The current results as a spreadsheet file (opens in Excel / Numbers / Sheets).
+    function exportCsv() {
+      if (!hits.length) return;
+      var rows = [["Tarih", "Saat", "Şarkı", "Sanatçı", "Albüm", "Dinleme (sn)", "Cihaz", "Ülke", "Nasıl başladı", "Nasıl bitti", "Karışık", "Çevrimdışı"]];
+      for (var j = 0; j < hits.length; j++) {
+        var i = playAt(j), d = new Date(P.t[i] * 1000), tk = P.tracks[P.tr[i]];
+        rows.push([iso(d), String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"),
+          tk[0], P.artists[tk[1]], P.albums[tk[2]] || "", Math.round(P.ms[i] / 1000), P.devices[P.dev[i]], P.countries[P.cc[i]],
+          STARTS[P.rs[i]], ENDS[P.re[i]], P.fl[i] & 1 ? "Evet" : "Hayır", P.fl[i] & 2 ? "Evet" : "Hayır"]);
+      }
+      var csv = "﻿" + rows.map(function (r) {
+        return r.map(function (c) { c = String(c); return /[";\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(";");
+      }).join("\r\n");
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      a.download = "spotify-dinlemeler.csv";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
     }
 
     function clear() {
-      $("xq").value = ""; $("xFrom").value = ""; $("xTo").value = ""; $("xShort").checked = false;
-      setToday(false);
+      $("xq").value = ""; $("xField").value = "all"; $("xFrom").value = ""; $("xTo").value = ""; $("xShort").checked = false;
+      $("xToday").setAttribute("aria-pressed", "false"); $("xFirsts").setAttribute("aria-pressed", "false");
+      box.querySelectorAll(".x-panel .chip[aria-pressed]").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+      $("fHourFrom").value = "0"; $("fHourTo").value = "23";
+      ["fShuffle", "fOffline", "fIncognito", "fCount"].forEach(function (id) { $(id).value = ""; });
       run();
     }
 
     var timer = 0;
-    $("xq").addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(run, 150); });
-    ["xFrom", "xTo"].forEach(function (id) { $(id).addEventListener("change", function () { setToday(false); run(); }); });
-    $("xShort").addEventListener("change", run);
-    $("xToday").addEventListener("click", function () { setToday(!today); run(); });
+    function later() { clearTimeout(timer); timer = setTimeout(run, 150); }
+    $("xq").addEventListener("input", later);
+    box.addEventListener("change", function (e) {
+      if (e.target.id === "xq" || e.target.id === "xSort") return;
+      if (e.target.id === "xFrom" || e.target.id === "xTo") $("xToday").setAttribute("aria-pressed", "false");
+      run();
+    });
+    box.addEventListener("click", function (e) {
+      var c = e.target.closest(".chip[aria-pressed]");
+      if (!c) return;
+      c.setAttribute("aria-pressed", c.getAttribute("aria-pressed") === "true" ? "false" : "true");
+      if (c.id === "xToday" && c.getAttribute("aria-pressed") === "true") { $("xFrom").value = ""; $("xTo").value = ""; }
+      later();
+    });
+    $("xSort").addEventListener("change", function () { shown = 0; $("xPlays").innerHTML = ""; more(); });
     $("xClear").addEventListener("click", clear);
     $("xMore").addEventListener("click", more);
+    $("xCsv").addEventListener("click", exportCsv);
 
     return {
       load: load,
@@ -1077,6 +1291,11 @@
   if (drop && window.indexedDB) {
     store.get().then(function (saved) {
       if (!saved || state.S) return;
+      if (!saved.plays || saved.plays.v !== PLAYS_VERSION) {
+        store.clear().catch(function () {});
+        setStatus("Sayfa güncellendi: yeni filtreler için dosyanı bir kez daha yükle.");
+        return;
+      }
       show(fromJSON(saved.summary), saved.kind, false);
       explorer.load(saved.plays);
       savedBanner(saved.savedAt);
