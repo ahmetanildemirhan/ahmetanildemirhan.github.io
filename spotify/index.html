@@ -350,7 +350,7 @@
 
   // Minimal ZIP reader: walks the central directory and inflates entries with
   // the browser's built-in DecompressionStream, so no library is needed.
-  async function readZip(file) {
+  async function readZip(file, onEntry) {
     var buf = await file.arrayBuffer();
     var dv = new DataView(buf);
     var eocd = -1;
@@ -362,7 +362,7 @@
     var p = dv.getUint32(eocd + 16, true);
     if (p === 0xffffffff) throw new Error("ZIP dosyası çok büyük. Açıp içindeki JSON dosyalarını bırakmayı dene.");
     var dec = new TextDecoder();
-    var out = [];
+    var wanted = [];
     for (var n = 0; n < count; n++) {
       if (dv.getUint32(p, true) !== 0x02014b50) break;
       var method = dv.getUint16(p + 10, true);
@@ -373,18 +373,22 @@
       var local = dv.getUint32(p + 42, true);
       var name = dec.decode(new Uint8Array(buf, p + 46, nameLen));
       p += 46 + nameLen + extraLen + commentLen;
-      if (!isHistoryName(name)) continue;
-      var start = local + 30 + dv.getUint16(local + 26, true) + dv.getUint16(local + 28, true);
-      var data = new Uint8Array(buf, start, size);
+      if (isHistoryName(name) && (method === 0 || method === 8)) wanted.push({ method: method, size: size, local: local });
+    }
+    // Inflate and hand over one file at a time so only one is held in memory.
+    for (var w = 0; w < wanted.length; w++) {
+      var e = wanted[w];
+      var start = e.local + 30 + dv.getUint16(e.local + 26, true) + dv.getUint16(e.local + 28, true);
+      var data = new Uint8Array(buf, start, e.size);
       var text;
-      if (method === 0) text = dec.decode(data);
-      else if (method === 8) {
+      if (e.method === 0) text = dec.decode(data);
+      else {
         var stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
         text = await new Response(stream).text();
-      } else continue;
-      out.push({ name: name, text: text });
+      }
+      onEntry(text, w + 1, wanted.length);
     }
-    return out;
+    return wanted.length;
   }
 
   function isHistoryName(name) {
@@ -392,48 +396,61 @@
     return /\.json$/i.test(base) && /stream(ing)?_?history/i.test(base);
   }
 
-  async function readFiles(files) {
-    var texts = [];
+  async function readFiles(files, parser) {
+    var found = 0;
     for (var i = 0; i < files.length; i++) {
       var f = files[i];
       if (/\.zip$/i.test(f.name) || f.type === "application/zip") {
         setStatus(f.name + " açılıyor…");
-        texts = texts.concat(await readZip(f));
+        found += await readZip(f, function (text, k, total) {
+          setStatus("Dinleme geçmişi okunuyor: " + k + " / " + total);
+          parser.add(text);
+        });
       } else if (/\.json$/i.test(f.name)) {
-        texts.push({ name: f.name, text: await f.text() });
+        parser.add(await f.text());
+        found++;
       }
+      await new Promise(function (r) { setTimeout(r, 0); });
     }
-    return texts;
+    return found;
   }
 
   // Spotify ships two formats: "Extended streaming history" (every play since
   // the account was opened) and the lighter "Account data" (last ~12 months).
-  function parseRecords(entries) {
+  function makeParser() {
     var extended = [], basic = [];
-    entries.forEach(function (e) {
+    function add(text) {
       var arr;
-      try { arr = JSON.parse(e.text); } catch (err) { return; }
+      try { arr = JSON.parse(text); } catch (err) { return; }
       if (!Array.isArray(arr)) return;
       arr.forEach(function (r) {
         if (r.ts !== undefined) {
           var t = Date.parse(r.ts);
           if (isNaN(t)) return;
           if (r.master_metadata_track_name) {
-            extended.push({ t: t, ms: +r.ms_played || 0, track: r.master_metadata_track_name, artist: r.master_metadata_album_artist_name || "Bilinmeyen sanatçı" });
+            var ms = +r.ms_played || 0;
+            extended.push({
+              t: t, ms: ms, track: r.master_metadata_track_name, artist: r.master_metadata_album_artist_name || "Bilinmeyen sanatçı",
+              skip: ms < MIN_PLAY && (r.skipped === true || r.reason_end === "fwdbtn")
+            });
           } else if (r.episode_name || r.episode_show_name || r.audiobook_title) {
             extended.push({ t: t, ms: +r.ms_played || 0, pod: true });
           }
         } else if (r.endTime !== undefined) {
           var tb = Date.parse(String(r.endTime).replace(" ", "T") + ":00Z");
           if (isNaN(tb)) return;
-          if (r.trackName) basic.push({ t: tb, ms: +r.msPlayed || 0, track: r.trackName, artist: r.artistName || "Bilinmeyen sanatçı" });
+          var bms = +r.msPlayed || 0;
+          if (r.trackName) basic.push({ t: tb, ms: bms, track: r.trackName, artist: r.artistName || "Bilinmeyen sanatçı", skip: bms > 0 && bms < MIN_PLAY });
           else if (r.podcastName || r.episodeName) basic.push({ t: tb, ms: +r.msPlayed || 0, pod: true });
         }
       });
-    });
+    }
     // If both formats were uploaded they overlap, so prefer the complete one.
-    if (extended.length) return { records: extended, kind: "extended" };
-    return { records: basic, kind: basic.length ? "basic" : "none" };
+    function result() {
+      if (extended.length) return { records: extended, kind: "extended" };
+      return { records: basic, kind: basic.length ? "basic" : "none" };
+    }
+    return { add: add, result: result };
   }
 
   /* ---------- Demo data ---------- */
@@ -485,7 +502,7 @@
         out.push({
           t: start + d * 864e5 + pickHour() * HOUR + Math.floor(rnd() * HOUR),
           ms: skipped ? Math.floor(rnd() * 25000) : Math.floor(150000 + rnd() * 110000),
-          track: ar.tracks[ti], artist: ar.name
+          track: ar.tracks[ti], artist: ar.name, skip: skipped
         });
       }
       if (rnd() < 0.15) out.push({ t: start + d * 864e5 + 8 * HOUR, ms: Math.floor(600000 + rnd() * 2400000), pod: true });
@@ -516,7 +533,7 @@
       var y = d.getFullYear();
       var play = r.ms >= MIN_PLAY ? 1 : 0;
       A.ms += r.ms; A.plays += play;
-      if (!play) A.skips++;
+      if (r.skip) A.skips++;
       days.add(y * 400 + d.getMonth() * 32 + d.getDate());
 
       var ar = artists.get(r.artist);
@@ -598,7 +615,7 @@
       ["Farklı sanatçı", nf.format(A.artists.length), ""],
       ["Farklı şarkı", nf.format(A.tracks.length), ""],
       ["Müzik dinlediğin gün", nf.format(A.activeDays), "Günde ortalama " + nf.format(Math.round(A.ms / A.activeDays / 60000)) + " dakika"],
-      ["Atladığın şarkı", nf.format(A.skips), "İlk 30 saniyede geçtiklerin"],
+      ["Atladığın şarkı", nf.format(A.skips), "İlk 30 saniyede ileri geçtiklerin"],
       ["Bir numaralı sanatçın", esc(topA.name), fmtHours(topA.ms), true],
       ["Bir numaralı şarkın", esc(topT.track), esc(topT.artist) + " · " + nf.format(topT.plays) + " kez", true]
     ];
@@ -695,7 +712,7 @@
         // Keep the top TOP+2 of this month as candidates.
         var top = [];
         for (var j = 0; j < names.length; j++) {
-          if (cur[j] <= 0) continue;
+          if (cur[j] < 60000) continue;
           if (top.length < TOP + 2 || cur[j] > cur[top[top.length - 1]]) {
             top.push(j);
             top.sort(function (a, b) { return cur[b] - cur[a]; });
@@ -721,15 +738,17 @@
       };
     }
 
+    // Colors go round the palette in the order artists first reach the chart,
+    // so neighbours rarely share one, and an artist keeps it across modes.
+    var PALETTE = ["#1ed760", "#ff4d2e", "#ffc53d", "#4da3ff", "#c084fc", "#ff7eb6", "#2dd4bf", "#f97316", "#a3e635", "#818cf8", "#f472b6", "#facc15"];
+    var colorMap = new Map();
     function colorFor(name) {
-      var h = 0;
-      for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
-      var palette = ["#1ed760", "#ff4d2e", "#ffc53d", "#4da3ff", "#c084fc", "#ff7eb6", "#2dd4bf", "#f97316", "#a3e635", "#60a5fa", "#f472b6", "#facc15"];
-      return palette[h % palette.length];
+      if (!colorMap.has(name)) colorMap.set(name, PALETTE[colorMap.size % PALETTE.length]);
+      return colorMap.get(name);
     }
 
     function load(agg) {
-      A = agg; data = {};
+      A = agg; data = {}; colorMap.clear();
       stop();
       $("scrub").max = String(A.months - 1);
       setMode($("mode").value);
@@ -775,7 +794,7 @@
       var i = Math.min(Math.floor(t), M - 1), f = t - i, i2 = Math.min(i + 1, M - 1);
       var cur = series.names.map(function (n, c) {
         return { n: n, c: c, v: series.vals[c][i] * (1 - f) + series.vals[c][i2] * f };
-      }).filter(function (e) { return e.v > 0; });
+      }).filter(function (e) { return e.v > 60000; });
       cur.sort(function (a, b) { return b.v - a.v; });
       var shown = cur.slice(0, TOP);
       var maxV = shown.length ? shown[0].v : 1;
@@ -1005,11 +1024,12 @@
     if (!files || !files.length) return;
     try {
       setStatus("Dosyalar okunuyor…");
-      var entries = await readFiles(files);
-      if (!entries.length) throw new Error("Bu dosyada dinleme geçmişi bulamadım. Spotify'dan gelen ZIP'i ya da içindeki \"Streaming_History\" JSON dosyalarını yükle.");
-      setStatus(entries.length + " dosya bulundu, hesaplanıyor…");
+      var parser = makeParser();
+      var found = await readFiles(files, parser);
+      if (!found) throw new Error("Bu dosyada dinleme geçmişi bulamadım. Spotify'dan gelen ZIP'i ya da içindeki \"Streaming_History\" JSON dosyalarını yükle.");
+      setStatus("Hesaplanıyor…");
       await new Promise(function (r) { setTimeout(r, 30); });
-      var parsed = parseRecords(entries);
+      var parsed = parser.result();
       if (!parsed.records.length) throw new Error("Dosyalarda dinleme kaydı bulamadım.");
       var A = aggregate(parsed.records);
       setStatus("");
