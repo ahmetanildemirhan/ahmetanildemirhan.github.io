@@ -265,7 +265,7 @@ dialog.vertical .player { aspect-ratio: 9 / 16; border-radius: 18px; }
 }
 
 /* Case study teaser on the home page */
-.cases { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 56px; }
+.cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 56px; }
 .case-feature {
   display: grid; grid-template-rows: auto 1fr; gap: 0;
   border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
@@ -274,10 +274,10 @@ dialog.vertical .player { aspect-ratio: 9 / 16; border-radius: 18px; }
 .case-feature:hover { border-color: var(--accent); }
 .case-feature .thumb { border: 0; border-radius: 0; aspect-ratio: 16 / 9; }
 .case-feature .thumb::after { display: none; }
-.case-feature .body { padding: 28px 30px 30px; display: flex; flex-direction: column; gap: 10px; }
+.case-feature .body { padding: 24px 26px 26px; display: flex; flex-direction: column; gap: 10px; }
 .case-feature .kicker { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
-.case-feature h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 28px; letter-spacing: -.03em; line-height: 1.05; }
-.case-feature p { color: var(--muted); }
+.case-feature h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 24px; letter-spacing: -.03em; line-height: 1.05; }
+.case-feature p { color: var(--muted); font-size: 15.5px; }
 .case-feature .go { font-weight: 600; margin-top: 6px; }
 
 /* Project pages */
