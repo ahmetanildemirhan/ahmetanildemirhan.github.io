@@ -2,8 +2,12 @@
 
 Kişisel portfolyo sitesi. Tek sayfa, ek kurulum gerektirmez.
 
-- `index.html` — sitenin tamamı (metinler, tasarım, video listesi)
-- `assets/ahmet.jpg` — profil fotoğrafı
+- `index.html` — ana sayfa (metinler, video listesi, Türkçe çeviriler)
+- `work/` — proje (vaka çalışması) sayfaları
+- `assets/site.css`, `assets/site.js` — tüm sayfaların ortak tasarımı ve davranışı (tema, dil, video oynatıcı)
+- `assets/ahmet.jpg` — profil fotoğrafı, `assets/og.png` — link paylaşım kartı
+- `cv/cv.html` — CV kaynağı; `assets/Ahmet-Anil-Demirhan-CV.pdf` buradan üretilir
+- `404.html`, `sitemap.xml`, `robots.txt` — bulunamayan sayfa ve arama motoru ayarları
 
 ## Video eklemek / çıkarmak
 
