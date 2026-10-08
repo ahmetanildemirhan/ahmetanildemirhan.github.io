@@ -862,7 +862,7 @@
   var explorer = (function () {
     var box = $("explore");
     if (!box) return { load: function () {}, search: function () {} };
-    var P = null, hits = [], shown = 0, PAGE = 25;
+    var P = null, hits = [];
     // Per-play columns derived once: local year, month, weekday, hour and month-day.
     var yr, mon, wd, hr, md, foldTrack, foldArtist, foldAlbum, trackTotal, firstPlay;
     var MONTHS_SHORT = MONTHS.map(function (m) { return m.slice(0, 3); });
@@ -1023,8 +1023,7 @@
       var n = hits.length;
       if (!n) {
         $("xStats").innerHTML = '<p class="x-empty">Bu filtrelerle eşleşen bir dinleme yok.</p>';
-        ["xChart", "xArtists", "xTracks", "xPlays"].forEach(function (id) { $(id).innerHTML = ""; });
-        $("xMore").classList.add("hidden");
+        ["xChart", "xArtists", "xTracks"].forEach(function (id) { $(id).innerHTML = ""; });
         return;
       }
       var totalMs = 0, plays = 0, trMs = new Float64Array(P.tracks.length), trPlays = new Uint32Array(P.tracks.length);
@@ -1059,10 +1058,6 @@
       tt.sort(function (p, q) { return q.plays - p.plays || q.ms - p.ms; });
       $("xArtists").innerHTML = rankList(ta.slice(0, 10), artistOpts);
       $("xTracks").innerHTML = rankList(tt.slice(0, 10), trackOpts);
-
-      shown = 0;
-      $("xPlays").innerHTML = "";
-      more();
     }
 
     // Listening per day for short spans, per month otherwise. Bars are clickable.
@@ -1109,39 +1104,12 @@
     function iso(d) {
       return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
     }
-    function playAt(j) { return $("xSort").value === "old" ? hits[j] : hits[hits.length - 1 - j]; }
-    function whenOf(i) {
-      var d = new Date(P.t[i] * 1000);
-      return d.getDate() + " " + MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear() + " · " +
-        String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
-    }
-    function durOf(ms) { return Math.floor(ms / 60000) + ":" + String(Math.floor(ms / 1000) % 60).padStart(2, "0"); }
-
-    function more() {
-      var html = "";
-      var end = Math.min(hits.length, shown + PAGE);
-      for (var j = shown; j < end; j++) {
-        var i = playAt(j), k = P.tr[i], dur = P.ms[i];
-        var tags = [P.devices[P.dev[i]]];
-        if (P.countries[P.cc[i]] !== "Türkiye" && P.countries[P.cc[i]] !== "Bilinmiyor") tags.push(P.countries[P.cc[i]]);
-        if (firstPlay[i]) tags.unshift("İlk dinleyiş");
-        html += '<li class="' + (dur < MIN_PLAY ? "short" : "") + '"><span class="when">' + whenOf(i) + '</span>' +
-          '<span class="what">' + esc(P.tracks[k][0]) + ' <span>— ' + esc(P.artists[P.tracks[k][1]]) + '</span>' +
-          '<em>' + esc(tags.join(" · ")) + '</em></span>' +
-          '<span class="dur">' + durOf(dur) + '</span></li>';
-      }
-      $("xPlays").insertAdjacentHTML("beforeend", html);
-      shown = end;
-      $("xMore").classList.toggle("hidden", shown >= hits.length);
-      $("xMore").textContent = "Daha fazla göster (" + nf.format(hits.length - shown) + " kaldı)";
-    }
-
     // The current results as a spreadsheet file (opens in Excel / Numbers / Sheets).
     function exportCsv() {
       if (!hits.length) return;
       var rows = [["Tarih", "Saat", "Şarkı", "Sanatçı", "Albüm", "Dinleme (sn)", "Cihaz", "Ülke", "Nasıl başladı", "Nasıl bitti", "Karışık", "Çevrimdışı"]];
       for (var j = 0; j < hits.length; j++) {
-        var i = playAt(j), d = new Date(P.t[i] * 1000), tk = P.tracks[P.tr[i]];
+        var i = hits[hits.length - 1 - j], d = new Date(P.t[i] * 1000), tk = P.tracks[P.tr[i]];
         rows.push([iso(d), String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"),
           tk[0], P.artists[tk[1]], P.albums[tk[2]] || "", Math.round(P.ms[i] / 1000), P.devices[P.dev[i]], P.countries[P.cc[i]],
           STARTS[P.rs[i]], ENDS[P.re[i]], P.fl[i] & 1 ? "Evet" : "Hayır", P.fl[i] & 2 ? "Evet" : "Hayır"]);
@@ -1169,7 +1137,7 @@
     function later() { clearTimeout(timer); timer = setTimeout(run, 150); }
     $("xq").addEventListener("input", later);
     box.addEventListener("change", function (e) {
-      if (e.target.id === "xq" || e.target.id === "xSort") return;
+      if (e.target.id === "xq") return;
       if (e.target.id === "xFrom" || e.target.id === "xTo") $("xToday").setAttribute("aria-pressed", "false");
       run();
     });
@@ -1180,9 +1148,7 @@
       if (c.id === "xToday" && c.getAttribute("aria-pressed") === "true") { $("xFrom").value = ""; $("xTo").value = ""; }
       later();
     });
-    $("xSort").addEventListener("change", function () { shown = 0; $("xPlays").innerHTML = ""; more(); });
     $("xClear").addEventListener("click", clear);
-    $("xMore").addEventListener("click", more);
     $("xCsv").addEventListener("click", exportCsv);
 
     return {
