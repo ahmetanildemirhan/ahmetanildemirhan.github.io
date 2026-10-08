@@ -100,8 +100,8 @@
     <span class="label" data-i18n="clients.label">Worked with</span>
     <div class="marquee">
       <div class="marquee-track">
-        <span>Interesting Engineering</span><span>Cointelegraph</span><span>Sheesha Finance</span><span>VShred</span><span>Milliyet</span><span>Posta</span><span>Kendago</span><span>BeezB</span>
-        <span aria-hidden="true">Interesting Engineering</span><span aria-hidden="true">Cointelegraph</span><span aria-hidden="true">Sheesha Finance</span><span aria-hidden="true">VShred</span><span aria-hidden="true">Milliyet</span><span aria-hidden="true">Posta</span><span aria-hidden="true">Kendago</span><span aria-hidden="true">BeezB</span>
+        <span>Interesting Engineering</span><span>Cointelegraph</span><span>Sheesha Finance</span><span>VShred</span><span>Milliyet</span><span>Posta</span><span>Kafa TV</span><span>Kendago</span><span>BeezB</span>
+        <span aria-hidden="true">Interesting Engineering</span><span aria-hidden="true">Cointelegraph</span><span aria-hidden="true">Sheesha Finance</span><span aria-hidden="true">VShred</span><span aria-hidden="true">Milliyet</span><span aria-hidden="true">Posta</span><span aria-hidden="true">Kafa TV</span><span aria-hidden="true">Kendago</span><span aria-hidden="true">BeezB</span>
       </div>
     </div>
   </div>
@@ -172,8 +172,14 @@
     <div class="grid" id="grid"></div>
     <div class="more"><button class="btn ghost" id="showMore" type="button" data-i18n="work.more">Show more</button></div>
 
-    <h3 class="sub reveal" data-i18n="social.title">Social &amp; vertical</h3>
-    <p class="intro reveal" data-i18n="social.intro">Short-form cuts built for TikTok, Reels and Shorts.</p>
+    <div class="row-head reveal">
+      <h3 class="sub" data-i18n="social.title">Social &amp; vertical</h3>
+      <div class="row-nav">
+        <button class="icon-btn" type="button" data-scroll="-1" aria-label="Previous">←</button>
+        <button class="icon-btn" type="button" data-scroll="1" aria-label="Next">→</button>
+      </div>
+    </div>
+    <p class="intro reveal" data-i18n="social.intro">Short-form cuts for Kafa TV and brands — built for Reels, TikTok and Shorts.</p>
     <div class="reel-row" id="reels"></div>
   </div>
 </section>
@@ -453,7 +459,7 @@
     "tab.motion": "Motion ve Tanıtım",
     "tab.tr": "Röportajlar",
     "social.title": "Sosyal medya ve dikey",
-    "social.intro": "TikTok, Reels ve Shorts için kısa formatlı kurgular.",
+    "social.intro": "Kafa TV ve markalar için kısa formatlı kurgular — Reels, TikTok ve Shorts için.",
     "process.eyebrow": "AI iş akışı",
     "process.title": "<em>AI video</em> nasıl yapıyorum.",
     "process.intro": "Üretken modeller, onları yöneten editör kadar iyidir. Bir fikri bitmiş, platforma hazır bir reklama dönüştürmek için kullandığım süreç bu.",
@@ -593,6 +599,18 @@
     ["gd", "18NZuCuDscyMZhskbjOf5h2ZdzEU2OTg9", "Sheesha Finance — DeFi Staking", "motion"],
     ["gd", "1_GbWgpV8zFy_M5ly6kHb9SZPAd-nblJB", "Sheesha Finance — How to swap", "motion"],
     ["gd", "10JI-goMLGo03bogpzlITaFsRfMM17Gvk", "Ready To Be Me Again — AI-animated music ad", "ai", true],
+    // Kafa TV — Reels
+    ["gd", "1_FPI7-QpWFvDa7U7wb9WmdYr5gT6HGBs", "Cehaleti kestim — Program Bitti", "kafa", true],
+    ["gd", "1GXGBjV_4XSPPKBxBgl6p0XD4AUyPJv7_", "Zeyto da Zeyto — Hacivat & Karagöz", "kafa", true],
+    ["gd", "1MLvWDCmmS3J2NzE1m1SDoZ_6nlY8eTvk", "Hangi Yüzle Gidiyosun!", "kafa", true],
+    ["gd", "1rQUHY1yNof6iMx524ho5sDjfJTb9ybpZ", "Can Yılmaz — Para", "kafa", true],
+    ["gd", "12QXZ80DN1ngR34Rlv3vtX_lCk4FI1rew", "Taklit", "kafa", true],
+    ["gd", "1jjsF8IyFlCjJ0vqLUHLkCETXPgauGfRa", "Ihlamur", "kafa", true],
+    ["gd", "1SfJV573XWy-Thgj_3IUNLzHJop-HJ-9R", "İmanım var", "kafa", true],
+    ["gd", "1jpOhbhU7OMnvxCNVE_iMwHFWA2KV1o2z", "Siesta", "kafa", true],
+    ["gd", "1KrfXzpheTNGVhk0TXFxgb9dkcobeDWaS", "İsmail", "kafa", true],
+    ["gd", "16RI6BvwoWS5m6fyVpqNrlzHOPcFDqbhZ", "Yine gözümüz", "kafa", true],
+    ["gd", "1Tz1aeHW0cOcAPHDhXqdJlM2uAJyTl-7g", "Deprem", "kafa", true],
     ["gd", "1nQm7ahUmaIdgcDkdOsuVPROEp49h8mdc", "What is a rug pull? — TikTok explainer", "social"],
     ["gd", "1hEBFs6R9opB8DixEQ_di9NCPoEjONMuU", "What does a rug pull look like? — TikTok explainer", "social"],
     ["gd", "16IF0oPRLZZx56eUKclW_pGn-_x1SHZg5", "How to know a project is a rug pull — TikTok explainer", "social"],
@@ -623,12 +641,12 @@
 
   const UI = {
     en: {
-      labels: { ads: "Performance Ads · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion & Promo", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok" },
+      labels: { ads: "Performance Ads · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion & Promo", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels" },
       sending: "Sending…", sent: "Thanks — your message is on its way. I'll get back to you soon.",
       failed: "Something went wrong. Please email me directly at aanildemirhan@gmail.com."
     },
     tr: {
-      labels: { ads: "Performans Reklamları · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion ve Tanıtım", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok" },
+      labels: { ads: "Performans Reklamları · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion ve Tanıtım", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels" },
       sending: "Gönderiliyor…", sent: "Teşekkürler, mesajınız ulaştı. En kısa sürede dönüş yapacağım.",
       failed: "Bir sorun oluştu. Lütfen doğrudan aanildemirhan@gmail.com adresine yazın."
     }
@@ -698,6 +716,10 @@
       status.textContent = UI[site.lang].failed;
     }
   });
+
+  document.querySelectorAll("[data-scroll]").forEach(btn => btn.addEventListener("click", () => {
+    reels.scrollBy({ left: Number(btn.dataset.scroll) * reels.clientWidth * 0.8, behavior: "smooth" });
+  }));
 
   document.addEventListener("langchange", render);
   render();
