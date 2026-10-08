@@ -141,7 +141,7 @@ h3.sub { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight:
 .row-head h3.sub { margin: 0 0 8px; }
 .row-nav { display: flex; gap: 8px; margin-bottom: 8px; }
 .row-nav .icon-btn { width: 42px; height: 42px; font-size: 18px; }
-.reel-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 240px); gap: 20px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+.reel-row { display: grid; align-items: start; grid-auto-flow: column; grid-auto-columns: minmax(200px, 240px); gap: 20px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
 .reel-row .card { scroll-snap-align: start; }
 .reel-row .thumb { aspect-ratio: 9 / 16; border-radius: 18px; }
 
