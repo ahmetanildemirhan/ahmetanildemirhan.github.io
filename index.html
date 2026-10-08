@@ -130,6 +130,11 @@
     .box li { margin-bottom: 4px; }
     .box small { color: var(--muted); }
     .box p { color: var(--muted); font-size: 15px; }
+    .box.wide { grid-column: 1 / -1; }
+    .ai-groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .group { display: block; font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chips span { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); font-size: 15px; font-weight: 500; }
 
     /* Contact */
     .contact { padding: 120px 0; text-align: center; }
@@ -168,7 +173,7 @@
       nav ul li:nth-child(2), nav ul li:nth-child(3) { display: none; }
       .logo { font-size: 15px; white-space: nowrap; }
       .hero { padding: 56px 0 56px; }
-      .grid, .about { grid-template-columns: 1fr; }
+      .grid, .about, .ai-groups { grid-template-columns: 1fr; }
       .job { grid-template-columns: 1fr; gap: 6px; }
       .stat { padding: 24px 12px; }
       .stat b { font-size: 40px; }
@@ -317,12 +322,28 @@
     <div class="eyebrow">Toolkit &amp; background</div>
     <h2 class="serif">The rest of the story.</h2>
     <div class="about">
+      <div class="box wide">
+        <h3>Generative AI toolkit</h3>
+        <div class="ai-groups">
+          <div>
+            <span class="group">Language models</span>
+            <div class="chips"><span>ChatGPT</span><span>Claude</span></div>
+          </div>
+          <div>
+            <span class="group">Image &amp; video generation</span>
+            <div class="chips"><span>Kling</span><span>Higgsfield</span><span>Magnific</span></div>
+          </div>
+          <div>
+            <span class="group">Voice &amp; audio</span>
+            <div class="chips"><span>ElevenLabs</span></div>
+          </div>
+        </div>
+      </div>
       <div class="box">
-        <h3>Tools</h3>
+        <h3>Editing &amp; motion</h3>
         <ul>
           <li>Adobe Creative Suite</li>
           <li>After Effects</li>
-          <li>Generative AI <small>· LLMs, image &amp; video models</small></li>
           <li>Animation Composer</li>
           <li>Envato Elements</li>
         </ul>
