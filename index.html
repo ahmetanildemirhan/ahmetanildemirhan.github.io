@@ -202,7 +202,8 @@
       <p class="lead">
         8+ years cutting video for digital publishers and D2C brands — from high-volume
         Meta &amp; YouTube ad creatives to documentary-style storytelling and motion design
-        in After Effects.
+        in After Effects. I build AI-assisted workflows with Claude to move faster
+        without cutting corners.
       </p>
       <div class="cta">
         <a class="btn primary" href="#work">Watch my work</a>
@@ -243,6 +244,17 @@
     <div class="eyebrow">Experience</div>
     <h2 class="serif">Where I've worked.</h2>
     <div class="jobs">
+      <div class="job">
+        <div class="when">Jun 2026 — Present</div>
+        <div>
+          <h3>BeezB</h3>
+          <div class="role">Motion Designer / Video Editor</div>
+          <ul>
+            <li>Creating motion-driven video content and ad creatives for D2C brands.</li>
+            <li>Built AI-assisted workflows with Claude to automate exports, captioning, review handoffs and asset organization.</li>
+          </ul>
+        </div>
+      </div>
       <div class="job">
         <div class="when">Apr 2023 — Feb 2026</div>
         <div>
@@ -307,8 +319,7 @@
         <ul>
           <li>Adobe Creative Suite</li>
           <li>After Effects</li>
-          <li>Blender</li>
-          <li>Cinema 4D</li>
+          <li>Claude <small>· AI workflows</small></li>
           <li>Animation Composer</li>
           <li>Envato Elements</li>
         </ul>
@@ -397,6 +408,7 @@
   // Show a mixed selection first so the "All" view isn't only one client.
   const featured = ["SREbl7Mpw2g", "vor7QpFE5-0", "1AxLJdeH6Vw", "8kMfD2rMlJk", "g8Qav3vIv9s", "7GlaTLhXmWM"];
   const STEP = 9;
+  const dead = new Set();
 
   const grid = document.getElementById("grid");
   const showMore = document.getElementById("showMore");
@@ -410,10 +422,10 @@
   }
 
   function render() {
-    const items = list();
+    const items = list().filter(v => !dead.has(v[0]));
     grid.innerHTML = items.slice(0, limit).map(([id, title, cat]) => `
       <button class="card" type="button" data-id="${id}">
-        <div class="thumb"><img loading="lazy" src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" onerror="this.style.visibility='hidden'"></div>
+        <div class="thumb"><img loading="lazy" src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt=""></div>
         <h3>${title}</h3>
         <p>${labels[cat]}</p>
       </button>`).join("");
@@ -443,6 +455,15 @@
 
   document.getElementById("year").textContent = new Date().getFullYear();
   render();
+
+  // Drop videos that are no longer available on YouTube.
+  videos.forEach(([id]) => {
+    const img = new Image();
+    const drop = () => { if (!dead.has(id)) { dead.add(id); render(); } };
+    img.onload = () => { if (img.naturalWidth <= 120) drop(); };
+    img.onerror = drop;
+    img.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  });
 </script>
 </body>
 </html>
