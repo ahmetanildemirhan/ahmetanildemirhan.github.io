@@ -331,11 +331,32 @@ dialog.vertical .player { aspect-ratio: 9 / 16; border-radius: 18px; }
 .credits-hero { display: grid; grid-template-columns: 340px 1fr; gap: 64px; align-items: center; margin-top: 48px; }
 .credits-hero .feature-video { margin-top: 0; }
 .credits-hero .feature-video .thumb { aspect-ratio: 9 / 16; border-radius: 22px; }
-.credits h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 28px; letter-spacing: -.02em; margin-bottom: 18px; }
-.credits ul { list-style: none; border-top: 1px solid var(--line); }
-.credits li { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
-.credits li span:first-child { color: var(--muted); }
-.credits li span:last-child { font-weight: 600; text-align: right; }
+.roll ol { list-style: none; counter-reset: roll; margin-top: 6px; }
+.roll li {
+  counter-increment: roll; display: flex; align-items: baseline; gap: 16px;
+  padding: 7px 0; transition: color .25s;
+}
+.roll li::before {
+  content: counter(roll, decimal-leading-zero);
+  font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--accent); width: 22px; flex: none;
+}
+.roll li span {
+  font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600;
+  font-size: clamp(24px, 2.6vw, 34px); letter-spacing: -.03em; line-height: 1.1; color: var(--muted);
+  transition: color .25s;
+}
+.roll li:hover span { color: var(--text); }
+.roll li small {
+  margin-left: auto; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  white-space: nowrap; opacity: .8;
+}
+.roll-by { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+.roll-by span { display: block; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.roll-by strong {
+  font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700;
+  font-size: clamp(32px, 3.8vw, 52px); letter-spacing: -.035em; line-height: 1;
+}
+.roll-by i { font-style: normal; color: var(--accent); }
 @media (max-width: 900px) {
   .credits-hero { grid-template-columns: 1fr; gap: 40px; }
   .credits-hero .feature-video { max-width: 320px; }
