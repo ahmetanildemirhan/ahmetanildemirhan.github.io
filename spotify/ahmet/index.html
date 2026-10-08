@@ -3,61 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Spotify Zaman Makinesi</title>
-  <meta name="description" content="Spotify'daki bütün dinleme geçmişini yükle: yıllara göre özetin, dinleme saatlerin ve videoya dönüştürülebilen sanatçı yarışın. Verin cihazından çıkmaz.">
+  <title>Spotify'daki 13 yılım — Ahmet Anıl Demirhan</title>
+  <meta name="description" content="2013'ten bu yana Spotify'da dinlediğim her şey: yıl yıl favorilerim, en çok dinlediğim sanatçılar ve 13 yıllık sanatçı yarışı.">
   <meta name="robots" content="noindex">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Spotify'daki 13 yılım">
+  <meta property="og:description" content="13.069 saat müzik, 210 bin şarkı. Yıl yıl favorilerim ve sanatçı yarışı.">
   <meta name="theme-color" content="#0b0d0c">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="../app.css">
 </head>
 <body>
 
 <header class="top">
   <div class="wrap">
-    <a class="logo" href="./">Spotify Zaman Makinesi<span>.</span></a>
-    <a class="top-link" href="../">ahmetanildemirhan</a>
+    <a class="logo" href="../">Spotify Zaman Makinesi<span>.</span></a>
+    <a class="top-link" href="../../">ahmetanildemirhan</a>
   </div>
 </header>
 
 <main>
-  <!-- Upload -->
-  <div id="upload" class="wrap intro">
-    <h1 class="display">Spotify'daki <em>bütün</em> geçmişin.</h1>
-    <p class="lead">İlk günden bugüne çaldığın her şarkı: yıl yıl özetin, hangi saatlerde dinlediğin ve videoya dönüştürebileceğin bir sanatçı yarışı.</p>
-
-    <div class="drop" id="drop">
-      <h2 class="display">Spotify'dan gelen dosyayı buraya bırak</h2>
-      <p>ZIP dosyasını olduğu gibi bırakabilirsin, açmana gerek yok.</p>
-      <div class="actions">
-        <button class="btn primary" id="pick">Dosya seç</button>
-        <button class="btn" id="demo">Örnek veriyle dene</button>
-      </div>
-      <input type="file" id="file" accept=".zip,.json,application/zip,application/json" multiple hidden>
-      <div class="status" id="status" role="status"></div>
-    </div>
-
-    <p class="privacy">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-      <span>Verin bu cihazdan çıkmaz. Dosya tarayıcında açılır ve burada hesaplanır; hiçbir sunucuya yüklenmez, hiçbir yere kaydedilmez. Sayfayı kapattığında her şey silinir.</span>
-    </p>
-
-    <details class="howto">
-      <summary>Verimi Spotify'dan nasıl alırım?</summary>
-      <ol>
-        <li>Bilgisayardan <strong>spotify.com/account/privacy</strong> adresine gir ve giriş yap.</li>
-        <li>Aşağı in, <strong>"Extended streaming history"</strong> (Genişletilmiş dinleme geçmişi) kutusunu işaretle. "Account data" sadece son bir yılı verir.</li>
-        <li><strong>Request data</strong> butonuna bas ve Spotify'ın gönderdiği onay e-postasındaki linke tıkla.</li>
-        <li>Birkaç gün içinde (en geç 30 gün) indirme linki e-postayla gelir. İndirdiğin <strong>my_spotify_data.zip</strong> dosyasını buraya bırak.</li>
-      </ol>
-    </details>
-  </div>
+  <p class="wrap loading" id="loading">Yükleniyor…</p>
 
   <!-- Results -->
   <div id="results" class="hidden">
     <div class="wrap">
-      <div class="banner hidden" id="banner"></div>
+      <section class="owner">
+        <p class="eyebrow">Ahmet Anıl Demirhan</p>
+        <h1 class="display">Spotify'daki 13 yılım.</h1>
+      </section>
 
       <section class="hero-res">
         <p class="since" id="since"></p>
@@ -70,7 +46,7 @@
       <section class="block" id="race">
         <p class="eyebrow">Sanatçı yarışı</p>
         <h2 class="display">Kim, ne zaman öne geçti?</h2>
-        <p class="intro-text">En çok dinlediğin sanatçılar ay ay yarışıyor. Formatı seç, oynat, beğenirsen video olarak indir.</p>
+        <p class="intro-text">En çok dinlediğim sanatçılar ay ay yarışıyor. Oynat ve izle; istersen video olarak da indirebilirsin.</p>
         <div class="race-box">
           <div class="race-stage"><canvas id="raceCanvas" width="1920" height="1080" aria-label="Sanatçı yarışı animasyonu"></canvas></div>
           <div class="scrub">
@@ -109,7 +85,7 @@
       <section class="block" id="yearsSec">
         <p class="eyebrow">Yıl yıl</p>
         <h2 class="display">Her yılın kendi şarkısı var.</h2>
-        <p class="intro-text">Yıllara göre toplam dinleme süren. Bir yıla dokunursan o yılın özetine gidersin.</p>
+        <p class="intro-text">Yıllara göre toplam dinleme sürem. Bir yıla dokunursan o yılın özetine gidersin.</p>
         <div class="year-bars" id="yearBars"></div>
         <div class="years" id="years"></div>
       </section>
@@ -125,13 +101,18 @@
       </section>
 
       <section class="block">
-        <p class="eyebrow">Dinleme saatlerin</p>
-        <h2 class="display" id="clockTitle">Ne zaman dinliyorsun?</h2>
-        <p class="intro-text">Haftanın günü ve saate göre toplam dinleme. Renk ne kadar koyuysa o saatte o kadar çok dinlemişsin.</p>
+        <p class="eyebrow">Dinleme saatlerim</p>
+        <h2 class="display" id="clockTitle">Ne zaman dinliyorum?</h2>
+        <p class="intro-text">Haftanın günü ve saate göre toplam dinleme. Renk ne kadar koyuysa o saatte o kadar çok dinlemişim.</p>
         <div class="heat-wrap">
           <div class="heat" id="heat"></div>
           <div class="heat-facts" id="heatFacts"></div>
         </div>
+      </section>
+      <section class="block cta">
+        <h2 class="display">Senin 13 yılın neye benziyor?</h2>
+        <p class="intro-text">Spotify'dan kendi dinleme geçmişini iste, bu sayfaya yükle. Verin cihazından çıkmaz.</p>
+        <a class="btn primary" href="../">Kendi geçmişime bak</a>
       </section>
     </div>
   </div>
@@ -139,11 +120,12 @@
 
 <footer>
   <div class="wrap">
-    <span>Verin yalnızca bu sekmede, senin cihazında işlenir.</span>
-    <button class="btn hidden" id="reset" style="padding:8px 16px">Başka bir dosya yükle</button>
+    <span>Spotify'ın gönderdiği dinleme geçmişimden derlendi.</span>
+    <a class="top-link" href="../">Sen de kendi geçmişine bak</a>
   </div>
 </footer>
 
-<script src="app.js"></script>
+<script>window.SPOTIFY = { data: "data.json", voice: "me" };</script>
+<script src="../app.js"></script>
 </body>
 </html>
