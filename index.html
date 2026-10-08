@@ -613,9 +613,9 @@
     ["gd", "18NZuCuDscyMZhskbjOf5h2ZdzEU2OTg9", "Sheesha Finance — DeFi Staking", "motion"],
     ["gd", "1_GbWgpV8zFy_M5ly6kHb9SZPAd-nblJB", "Sheesha Finance — How to swap", "motion"],
     ["gd", "10JI-goMLGo03bogpzlITaFsRfMM17Gvk", "Ready To Be Me Again — AI-animated music ad", "ai", true],
-    // Kafa TV — Reels
+    // Kafa TV
+    ["gd", "1yciF6xmdqFjppKJGz578z_I7ERbWBUfT", "Zeyto da Zeyto — Hacivat & Karagöz", "kafahd"],
     ["gd", "1_FPI7-QpWFvDa7U7wb9WmdYr5gT6HGBs", "Cehaleti kestim — Program Bitti", "kafa", true],
-    ["gd", "1GXGBjV_4XSPPKBxBgl6p0XD4AUyPJv7_", "Zeyto da Zeyto — Hacivat & Karagöz", "kafa", true],
     ["gd", "1MLvWDCmmS3J2NzE1m1SDoZ_6nlY8eTvk", "Hangi Yüzle Gidiyosun!", "kafa", true],
     ["gd", "1rQUHY1yNof6iMx524ho5sDjfJTb9ybpZ", "Can Yılmaz — Para", "kafa", true],
     ["gd", "12QXZ80DN1ngR34Rlv3vtX_lCk4FI1rew", "Taklit", "kafa", true],
@@ -645,19 +645,19 @@
   // Show a mixed selection first so the "All" view isn't only one client.
   const featured = [
     "1eEIGhpaQalp_2YZss0ATCWoCbRARMluo", "g8Qav3vIv9s", "1eTus0-Eg_U7TNooIdwFVpkdXgBSRgkxV",
-    "1XUudq1sTLsr0_prn1Ijd5za7qmhOZSKK", "vor7QpFE5-0", "11XsqWFF-GyEatNo7b0Dkc6jfE4OlJLal",
+    "1XUudq1sTLsr0_prn1Ijd5za7qmhOZSKK", "1yciF6xmdqFjppKJGz578z_I7ERbWBUfT", "vor7QpFE5-0", "11XsqWFF-GyEatNo7b0Dkc6jfE4OlJLal",
     "12lZfEtjoI7pUZ-2l2leSVi2RlOXw6sS-", "1HR_Dr7uBVm5UMhQZJ1LwLrhaTUpzOEAC", "8kMfD2rMlJk"
   ];
   const STEP = 9;
 
   const UI = {
     en: {
-      labels: { ads: "Performance Ads · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion & Promo", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels" },
+      labels: { ads: "Performance Ads · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion & Promo", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels", kafahd: "Kafa TV" },
       sending: "Sending…", sent: "Thanks — your message is on its way. I'll get back to you soon.",
       failed: "Something went wrong. Please email me directly at aanildemirhan@gmail.com."
     },
     tr: {
-      labels: { ads: "Performans Reklamları · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion ve Tanıtım", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels" },
+      labels: { ads: "Performans Reklamları · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion ve Tanıtım", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels", kafahd: "Kafa TV" },
       sending: "Gönderiliyor…", sent: "Teşekkürler, mesajınız ulaştı. En kısa sürede dönüş yapacağım.",
       failed: "Bir sorun oluştu. Lütfen doğrudan aanildemirhan@gmail.com adresine yazın."
     }
@@ -683,7 +683,9 @@
 
   function list() {
     const horizontal = videos.filter(v => !isVertical(v));
-    if (filter !== "all") return horizontal.filter(v => v[3] === filter);
+    // The Motion & Promo tab also lists Kafa TV's horizontal pieces.
+    const inTab = v => v[3] === filter || (filter === "motion" && v[3] === "kafahd");
+    if (filter !== "all") return horizontal.filter(inTab);
     const first = featured.map(id => horizontal.find(v => v[1] === id)).filter(Boolean);
     return first.concat(horizontal.filter(v => !featured.includes(v[1])));
   }
