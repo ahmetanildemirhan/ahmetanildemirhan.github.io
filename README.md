@@ -10,11 +10,14 @@ Kişisel portfolyo sitesi. Tek sayfa, ek kurulum gerektirmez.
 `index.html` içinde `const videos = [` satırını bul. Her satır bir videodur:
 
 ```js
-["YOUTUBE_ID", "Video başlığı", "ie"],
+["gd", "DRIVE_ID", "Video başlığı", "ie"],
+["yt", "YOUTUBE_ID", "Video başlığı", "tr"],
 ```
 
-`YOUTUBE_ID`, YouTube linkindeki koddur (`youtu.be/SREbl7Mpw2g` → `SREbl7Mpw2g`).
-Son alan kategoridir: `ie` = Interesting Engineering, `tr` = Milliyet/Posta.
+- `gd` = Google Drive. ID, Drive linkindeki koddur (`drive.google.com/file/d/BURASI/view`).
+  Dosya "linke sahip herkes görüntüleyebilir" olarak paylaşılmış olmalı.
+- `yt` = YouTube. ID, linkteki koddur (`youtu.be/BURASI`). YouTube'dan kalkan videolar sitede otomatik gizlenir.
+- Son alan kategoridir: `ads`, `ai`, `ie`, `motion`, `tr`.
 
 ## Yayında tutmak
 

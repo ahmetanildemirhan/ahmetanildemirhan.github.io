@@ -99,7 +99,7 @@
     .tab[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px 20px; align-items: start; }
     .card { display: block; width: 100%; cursor: pointer; background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; }
-    .thumb { position: relative; overflow: hidden; border-radius: 10px; aspect-ratio: 16 / 9; background: var(--bg-2); }
+    .thumb { position: relative; overflow: hidden; border-radius: 10px; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #1d1d21, #121214); border: 1px solid var(--line); }
     .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s, opacity .3s; opacity: .9; }
     .thumb::after {
       content: ""; position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px;
@@ -231,8 +231,11 @@
     <h2 class="serif">Things I've cut.</h2>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" data-filter="all">All</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="ads">Performance Ads</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="ai">AI Video</button>
       <button class="tab" role="tab" aria-selected="false" data-filter="ie">Interesting Engineering</button>
-      <button class="tab" role="tab" aria-selected="false" data-filter="tr">Interviews · Milliyet &amp; Posta</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="motion">Motion &amp; Promo</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="tr">Interviews</button>
     </div>
     <div class="grid" id="grid"></div>
     <div class="more"><button class="btn ghost" id="showMore" type="button">Show more</button></div>
@@ -370,45 +373,106 @@
 </dialog>
 
 <script>
+  // Each entry: [source, id, title, category]. source "gd" = Google Drive, "yt" = YouTube.
   const videos = [
+    // Performance ads (Kendago)
+    ["gd", "1eEIGhpaQalp_2YZss0ATCWoCbRARMluo", "Top-performing ad #1 — VShred quiz funnel", "ads"],
+    ["gd", "11XsqWFF-GyEatNo7b0Dkc6jfE4OlJLal", "Top-performing ad #2 — VShred quiz funnel", "ads"],
+    ["gd", "1LJi0L4ZWKX0zCxoQxSQOSm_Zu-rbgupb", "Top-performing ad #3 — Podcast-style ad", "ads"],
+    ["gd", "1qRsej82-V1je73p071LygAbgV1QmH4D8", "Full ad — Facebook quiz funnel", "ads"],
+    ["gd", "12K0OMQxopUsECcfKgL8N8lxq8xH9J4nk", "Hook test — gym fails", "ads"],
+    ["gd", "1sJN9QGW0-M_lIcHlXVymMN4JmzNxdjct", "Intro variation — food myths angle", "ads"],
+    ["gd", "1vwUjd8Wu1UF3VyFA8fMlGUUtiJXKKK4L", "Intro variation — \"Have you seen\" angle", "ads"],
+    ["gd", "1DQyc8-ABW0vNNZZm_u7lFNKnzN9_dt0O", "Full ad — illustrated style", "ads"],
+    // AI video
+    ["gd", "1eTus0-Eg_U7TNooIdwFVpkdXgBSRgkxV", "AI character ad — Cortisol", "ai"],
+    ["gd", "1dYzSrQFNlNJSc__GhqCk0vi1v0FZvIb6", "AI ad — Body & Skin", "ai"],
+    ["gd", "1uUKzgDv_8SlrBV1TPSourvT6yL08_vwz", "AI ad — Health & Body Parts", "ai"],
+    ["gd", "1HR_Dr7uBVm5UMhQZJ1LwLrhaTUpzOEAC", "AI avatar — AI Presenter", "ai"],
+    ["gd", "1OeRDhlmb2zUuNsmhmfO8etfvIBeGfa5m", "Lost Ways — AI film", "ai"],
     // Interesting Engineering
-    ["SREbl7Mpw2g", "5 reasons why the world is running out of chips", "ie"],
-    ["1AxLJdeH6Vw", "What can you do with a Boston Dynamics robot?", "ie"],
-    ["g8Qav3vIv9s", "How are microchips made?", "ie"],
-    ["639mqmZEvkM", "Japan's engineering solutions for the next tsunami", "ie"],
-    ["JyOg4zWXwG0", "What would happen if humans disappeared", "ie"],
-    ["uuFpfnqOBZw", "What is the dark web?", "ie"],
-    ["PRX3PHOh_L8", "D3O: The life-saving protective goo", "ie"],
-    ["8IitiMvjiVg", "A look inside Australia's nuclear submarine deal", "ie"],
-    ["li1aG7mAaH0", "The ISS vs China's Tiangong: Which is better?", "ie"],
-    ["RPyEwAKFlPg", "Gas vs electric cars: which is really better?", "ie"],
-    ["3FhbtsVaRUA", "How technology is reshaping the future of wildfires", "ie"],
-    ["aKLNOt85PMI", "What happens when skyscrapers are struck by lightning?", "ie"],
-    ["p0qe3HSdEmI", "When and why do buildings collapse?", "ie"],
-    ["cEW2nnB6ja4", "High-speed trains that can cross continents", "ie"],
-    ["DtpckvIBrqo", "How engineers build different bridges", "ie"],
-    ["iiBiujnAurA", "9 generations of gaming consoles", "ie"],
-    ["FXk76rWYdEs", "9 water jet cutting machines", "ie"],
-    ["_rCXyNQDtgw", "8 technologies that stop nearly any vehicle", "ie"],
-    ["mxMRV8B6CfM", "Short circuits — when electricity goes wrong", "ie"],
-    ["iuMfdFCvChA", "Global shipping crisis: Amazon and others take on a DIY approach", "ie"],
-    ["YYXbylXx504", "How do we remove CO2 from the atmosphere?", "ie"],
-    ["1oQNVuNdZP4", "Why changing lanes doesn't get you there faster", "ie"],
-    ["P6hYnsx27eQ", "Why are roads made of asphalt?", "ie"],
-    ["R2DU9YNp7oA", "3D printing helps us build structures faster and cheaper", "ie"],
-    ["8SjxCHqVH1g", "5 ancient organisms resurrected by science", "ie"],
+    ["gd", "123Gh-NNnEUnTaNWPeGXMknIFwYtRA9Y2", "5 reasons why the world is running out of chips", "ie"],
+    ["gd", "1VE3PK46Fg7Zw1JdBSGN47viY1pLCoanE", "2021 highlights — breakthroughs and discoveries", "ie"],
+    ["gd", "12lZfEtjoI7pUZ-2l2leSVi2RlOXw6sS-", "How Starlink's 42,000 satellites will transform the world", "ie"],
+    ["gd", "1y8oDEwFQNyIx-2xOyEpT1DNAWlbvZyG3", "What is the dark web?", "ie"],
+    ["gd", "1cmJgec8sTV0xiEexh_lw1od2vC0TqWyG", "Japan's engineering solutions for the next tsunami", "ie"],
+    ["gd", "1LvqrjmG2sBtK3sXe1qHVhkcLphZHaqQA", "The Overview Effect", "ie"],
+    ["gd", "10VCIUGJVJr3MxnxWzAo34mjvJ9Vrttvu", "D3O: The goo that could save your life", "ie"],
+    ["gd", "1fCjm-xgIB0IIJvS4CD2VHzr7YzzHN0pC", "How missile guidance systems work", "ie"],
+    ["gd", "1wQQrrBq3CJDZ9OhCY-DxVvMf-CYq5F1j", "Why do we need telescopes in space?", "ie"],
+    ["gd", "1SrD-CfCJLChh7kkT1emj_EgdatXSf1L6", "The deadliest viruses on Earth", "ie"],
+    ["gd", "1ipFEPkDjjIxBGESTdLoZFPLrJV-CCpD_", "Space debris: a problem that's only getting bigger", "ie"],
+    ["gd", "1rBQMtyW4CwQWN8v23h5PIA8bALhU-jI_", "What would happen if you skydived off the ISS?", "ie"],
+    ["gd", "1FsND_o3SpwiEAfbYHV1ba1eTudDqEi67", "What will happen after the apocalypse?", "ie"],
+    ["gd", "12lCtOAt1PsEK_9qT_y_mLUpX7Rr2npG7", "The ISS vs China's Tiangong: Which is better?", "ie"],
+    ["gd", "18zfVPg-6GgPrgJJcEIpULd4H39-x6LGJ", "Gas vs electric cars: which is really better?", "ie"],
+    ["gd", "1X0U3-MAEnlRrk39pWnGGRm8suLQG26Ao", "How technology is reshaping the future of wildfires", "ie"],
+    ["gd", "1Rzt40lW1IiGsTkoj_zVvjAyPA0MWzSe7", "What happens when skyscrapers are struck by lightning?", "ie"],
+    ["gd", "1gGPtKBrE8mT_8xTqDoyeKb3SyZ5OZy6a", "When and why do buildings collapse?", "ie"],
+    ["gd", "1SN9TRQ9LCepXUmeaavfT06-H5Zcns-o_", "High-speed trains that can cross continents", "ie"],
+    ["gd", "1iERe52Xan9cWPvwBRo6DMC1ltClZOli_", "How engineers build different bridges", "ie"],
+    ["gd", "1dl-ML-FiDTbo--vS-1HKTjVL1h30qAl1", "9 generations of gaming consoles", "ie"],
+    ["gd", "1tNc9tQwuMpFLJqwaDLZ8ZJ5TC1jhU-T4", "What is the fastest plane in the world?", "ie"],
+    ["gd", "11AT_mvE6gk6DtOQDNsnIqB_Hrr5xM3dQ", "Why plane tires don't explode on impact", "ie"],
+    ["gd", "1dVd7HqVZSCGo9drkRvAg-K8gJSq5Nzfb", "A look inside Australia's nuclear submarine deal", "ie"],
+    ["gd", "1er52pEJ71SaIwgp4xohmekDt15FNSNpj", "Short circuits — when electricity goes wrong", "ie"],
+    ["gd", "1jbXhf_CteOxKnZaqAkANdYJLODkU_6u2", "Global shipping crisis: Amazon and others take on a DIY approach", "ie"],
+    ["gd", "1wR5bkitkTW1rpOJ6Ml93hw5gGKllGX9o", "How do we remove CO2 from the atmosphere?", "ie"],
+    ["gd", "1_D-mqy5KunRci2pFK32BPJ9wmCLkRsZb", "Why changing lanes doesn't get you there faster", "ie"],
+    ["gd", "1yOk56G8-K3JM_rZhNNgjtczKXvs5wazu", "Why are roads made of asphalt?", "ie"],
+    ["gd", "1BU8RcjKnJqPUOB6OT8W2NNoPduIuQa8x", "3D printing helps us build structures faster and cheaper", "ie"],
+    ["yt", "1AxLJdeH6Vw", "What can you do with a Boston Dynamics robot?", "ie"],
+    ["yt", "g8Qav3vIv9s", "How are microchips made?", "ie"],
+    ["yt", "JyOg4zWXwG0", "What would happen if humans disappeared", "ie"],
+    ["yt", "FXk76rWYdEs", "9 water jet cutting machines", "ie"],
+    ["yt", "_rCXyNQDtgw", "8 technologies that stop nearly any vehicle", "ie"],
+    ["yt", "8SjxCHqVH1g", "5 ancient organisms resurrected by science", "ie"],
+    // Motion & promo
+    ["gd", "1XUudq1sTLsr0_prn1Ijd5za7qmhOZSKK", "Sheesha Finance — Equity Raise explainer", "motion"],
+    ["gd", "18NZuCuDscyMZhskbjOf5h2ZdzEU2OTg9", "Sheesha Finance — DeFi Staking", "motion"],
+    ["gd", "1_GbWgpV8zFy_M5ly6kHb9SZPAd-nblJB", "Sheesha Finance — How to swap", "motion"],
+    ["gd", "1nQm7ahUmaIdgcDkdOsuVPROEp49h8mdc", "What is a rug pull? — TikTok explainer", "motion"],
+    ["gd", "1hEBFs6R9opB8DixEQ_di9NCPoEjONMuU", "What does a rug pull look like? — TikTok explainer", "motion"],
+    ["gd", "16IF0oPRLZZx56eUKclW_pGn-_x1SHZg5", "How to know a project is a rug pull — TikTok explainer", "motion"],
+    ["gd", "1bJ4hoEJwiYE7gjkiJmOnyryBuzmaXsXv", "Rootangle — Promo", "motion"],
+    ["gd", "1i2qXQyi5fgYwQy9lg2gfkiIuBVVxhqMH", "Slow Türk — Promo", "motion"],
+    ["gd", "1H4rdLSO-T64k_oZ-28pwUhbu7RC_qjLb", "Collab Reveal", "motion"],
+    ["gd", "1ZcISheyoLkhFUDg4oqn-nGks0udwGmyv", "NFM", "motion"],
+    ["gd", "14xw0ufHrag8G_LG3fXt0ZVeDhEXCe1cN", "TRAI", "motion"],
+    ["gd", "1u1NuQBqh77w_dF77QT5ptyMBh9ifAhOl", "V1", "motion"],
+    ["gd", "13glOzg265ga_vnKRdSUzwv7nIJn-pwy9", "AZ Coffee", "motion"],
+    ["gd", "1kNQX_Ft1YKdQDOtZjAgG3ds7rh5a0Snj", "Kaya Kalpa — documentary", "motion"],
+    ["gd", "1NvCzUOVF8zmrhD9ycxZNzlhn0xCay0Da", "29 Ekim", "motion"],
+    ["gd", "1yyzlkl8Sb2-5Lk5Au27y8Ck9hajeIV-b", "Nuri Baba", "motion"],
     // Milliyet & Posta
-    ["vor7QpFE5-0", "Cem Yılmaz — Molatik Özel", "tr"],
-    ["8kMfD2rMlJk", "Hayko Cepkin — Molatik Özel", "tr"],
-    ["7GlaTLhXmWM", "Okan Bayülgen — Molatik Özel", "tr"],
-    ["NB662XW7Oj8", "İki Dakika — maNga", "tr"],
-    ["1YV63XYlgbk", "Çetin Çetintaş: Bir Yoginin Hikayesi", "tr"]
+    ["yt", "vor7QpFE5-0", "Cem Yılmaz — Molatik Özel", "tr"],
+    ["yt", "8kMfD2rMlJk", "Hayko Cepkin — Molatik Özel", "tr"],
+    ["yt", "7GlaTLhXmWM", "Okan Bayülgen — Molatik Özel", "tr"],
+    ["yt", "NB662XW7Oj8", "İki Dakika — maNga", "tr"],
+    ["yt", "1YV63XYlgbk", "Çetin Çetintaş: Bir Yoginin Hikayesi", "tr"]
   ];
-  const labels = { ie: "Interesting Engineering", tr: "Milliyet · Molatik" };
+  const labels = {
+    ads: "Performance Ads · Kendago",
+    ai: "AI Video",
+    ie: "Interesting Engineering",
+    motion: "Motion & Promo",
+    tr: "Milliyet · Molatik"
+  };
   // Show a mixed selection first so the "All" view isn't only one client.
-  const featured = ["SREbl7Mpw2g", "vor7QpFE5-0", "1AxLJdeH6Vw", "8kMfD2rMlJk", "g8Qav3vIv9s", "7GlaTLhXmWM"];
+  const featured = [
+    "1eEIGhpaQalp_2YZss0ATCWoCbRARMluo", "123Gh-NNnEUnTaNWPeGXMknIFwYtRA9Y2", "1eTus0-Eg_U7TNooIdwFVpkdXgBSRgkxV",
+    "1XUudq1sTLsr0_prn1Ijd5za7qmhOZSKK", "vor7QpFE5-0", "11XsqWFF-GyEatNo7b0Dkc6jfE4OlJLal",
+    "12lZfEtjoI7pUZ-2l2leSVi2RlOXw6sS-", "1HR_Dr7uBVm5UMhQZJ1LwLrhaTUpzOEAC", "8kMfD2rMlJk"
+  ];
   const STEP = 9;
   const dead = new Set();
+
+  const thumbUrl = (src, id) => src === "yt"
+    ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+    : `https://drive.google.com/thumbnail?id=${id}&sz=w640`;
+  const playerUrl = (src, id) => src === "yt"
+    ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`
+    : `https://drive.google.com/file/d/${id}/preview`;
 
   const grid = document.getElementById("grid");
   const showMore = document.getElementById("showMore");
@@ -416,16 +480,16 @@
   let limit = STEP;
 
   function list() {
-    if (filter !== "all") return videos.filter(v => v[2] === filter);
-    const first = featured.map(id => videos.find(v => v[0] === id));
-    return first.concat(videos.filter(v => !featured.includes(v[0])));
+    if (filter !== "all") return videos.filter(v => v[3] === filter);
+    const first = featured.map(id => videos.find(v => v[1] === id));
+    return first.concat(videos.filter(v => !featured.includes(v[1])));
   }
 
   function render() {
-    const items = list().filter(v => !dead.has(v[0]));
-    grid.innerHTML = items.slice(0, limit).map(([id, title, cat]) => `
-      <button class="card" type="button" data-id="${id}">
-        <div class="thumb"><img loading="lazy" src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt=""></div>
+    const items = list().filter(v => !dead.has(v[1]));
+    grid.innerHTML = items.slice(0, limit).map(([src, id, title, cat]) => `
+      <button class="card" type="button" data-src="${src}" data-id="${id}">
+        <div class="thumb"><img loading="lazy" src="${thumbUrl(src, id)}" alt="" onerror="this.remove()"></div>
         <h3>${title}</h3>
         <p>${labels[cat]}</p>
       </button>`).join("");
@@ -445,7 +509,7 @@
   grid.addEventListener("click", e => {
     const card = e.target.closest(".card");
     if (!card) return;
-    frame.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${card.dataset.id}?autoplay=1&rel=0"
+    frame.innerHTML = `<iframe src="${playerUrl(card.dataset.src, card.dataset.id)}"
       allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe>`;
     dialog.showModal();
   });
@@ -456,13 +520,14 @@
   document.getElementById("year").textContent = new Date().getFullYear();
   render();
 
-  // Drop videos that are no longer available on YouTube.
-  videos.forEach(([id]) => {
+  // Drop YouTube videos that are no longer available: their thumbnail 404s
+  // or comes back as a 120x90 placeholder.
+  videos.filter(v => v[0] === "yt").forEach(([, id]) => {
     const img = new Image();
     const drop = () => { if (!dead.has(id)) { dead.add(id); render(); } };
     img.onload = () => { if (img.naturalWidth <= 120) drop(); };
     img.onerror = drop;
-    img.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+    img.src = thumbUrl("yt", id);
   });
 </script>
 </body>
