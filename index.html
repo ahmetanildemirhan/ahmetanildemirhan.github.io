@@ -1,26 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ahmet Anıl Demirhan — Senior Video Editor</title>
-  <meta name="description" content="Senior Video Editor with 8+ years across digital publishing and D2C performance marketing. Meta & YouTube ad creatives, documentary storytelling, motion design.">
+  <meta name="description" content="Senior Video Editor and AI video creator with 8+ years across digital publishing and D2C performance marketing. Meta & YouTube ad creatives, generative AI video, documentary storytelling, motion design.">
   <meta property="og:title" content="Ahmet Anıl Demirhan — Senior Video Editor">
-  <meta property="og:description" content="Performance ad creatives, documentary-style storytelling and motion design. 200M+ views.">
+  <meta property="og:description" content="Performance ad creatives, generative AI video, documentary-style storytelling and motion design. 200M+ views.">
   <meta property="og:image" content="assets/ahmet.jpg">
+  <meta name="theme-color" content="#0c0c0d">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    // Apply saved theme/language before paint to avoid a flash.
+    (function () {
+      var d = document.documentElement;
+      d.classList.add("js");
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "light" || t === "dark") d.dataset.theme = t;
+      } catch (e) {}
+    })();
+  </script>
   <style>
     :root {
       --bg: #0c0c0d;
       --bg-2: #141416;
+      --bg-3: #1b1b1e;
       --line: #26262a;
       --text: #f2f0ec;
       --muted: #9a978f;
       --accent: #ff4d2e;
+      --nav-bg: rgba(12, 12, 13, .82);
       --radius: 14px;
       --max: 1120px;
+    }
+    :root[data-theme="light"] {
+      --bg: #f5f3ee;
+      --bg-2: #ffffff;
+      --bg-3: #ece9e2;
+      --line: #e1ddd4;
+      --text: #151515;
+      --muted: #6b675f;
+      --accent: #e8401f;
+      --nav-bg: rgba(245, 243, 238, .85);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -31,6 +55,7 @@
       font-size: 17px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      transition: background .3s, color .3s;
     }
     a { color: inherit; }
     img { display: block; max-width: 100%; }
@@ -40,16 +65,27 @@
     /* Nav */
     nav {
       position: sticky; top: 0; z-index: 10;
-      background: rgba(12, 12, 13, .82);
+      background: var(--nav-bg);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--line);
     }
-    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
-    .logo { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; text-decoration: none; letter-spacing: -.01em; font-size: 18px; }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 60px; }
+    .logo { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; text-decoration: none; letter-spacing: -.01em; font-size: 18px; white-space: nowrap; }
     .logo span { color: var(--accent); }
-    nav ul { list-style: none; display: flex; gap: 28px; font-size: 15px; }
+    .nav-right { display: flex; align-items: center; gap: 24px; }
+    nav ul { list-style: none; display: flex; gap: 24px; font-size: 15px; }
     nav ul a { text-decoration: none; color: var(--muted); transition: color .2s; }
     nav ul a:hover { color: var(--text); }
+    .toggles { display: flex; gap: 6px; }
+    .icon-btn {
+      height: 34px; min-width: 34px; padding: 0 10px; border-radius: 999px;
+      border: 1px solid var(--line); background: transparent; color: var(--text);
+      font: inherit; font-size: 13px; font-weight: 600; letter-spacing: .04em; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .icon-btn:hover { background: var(--bg-2); }
+    .icon-btn svg { width: 16px; height: 16px; }
+    :root[data-theme="light"] .i-sun, :root:not([data-theme="light"]) .i-moon { display: none; }
 
     /* Hero */
     .hero { padding: 96px 0 72px; }
@@ -58,23 +94,33 @@
     .rec::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); animation: blink 1.6s infinite; }
     @keyframes blink { 50% { opacity: .2; } }
     h1 { font-size: clamp(42px, 6.2vw, 82px); line-height: .98; letter-spacing: -.028em; }
-    h1 em { font-style: normal; color: var(--accent); }
+    h1 em, h2 em { font-style: normal; color: var(--accent); }
     .lead { margin-top: 28px; font-size: 19px; color: var(--muted); max-width: 560px; }
     .cta { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
     .btn {
-      display: inline-block; padding: 13px 22px; border-radius: 999px;
-      font-size: 15px; font-weight: 600; text-decoration: none;
-      border: 1px solid var(--line); transition: transform .2s, background .2s;
+      display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 999px;
+      font: inherit; font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer;
+      border: 1px solid var(--line); background: transparent; color: var(--text);
+      transition: transform .2s, background .2s;
     }
     .btn:hover { transform: translateY(-2px); }
     .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
     .btn.ghost:hover { background: var(--bg-2); }
-    .portrait { position: relative; }
+    .portrait { position: relative; z-index: 0; }
     .portrait img { border-radius: var(--radius); filter: grayscale(1) contrast(1.05); aspect-ratio: 4 / 5; object-fit: cover; width: 100%; }
     .portrait::after {
       content: ""; position: absolute; inset: 14px -14px -14px 14px;
       border: 1px solid var(--accent); border-radius: var(--radius); z-index: -1;
     }
+
+    /* Worked with */
+    .clients { border-top: 1px solid var(--line); padding: 28px 0; overflow: hidden; }
+    .clients .wrap { display: flex; align-items: center; gap: 32px; }
+    .clients .label { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+    .marquee { flex: 1; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+    .marquee-track { display: flex; gap: 48px; width: max-content; animation: scroll 38s linear infinite; }
+    .marquee-track span { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 22px; letter-spacing: -.02em; color: var(--muted); white-space: nowrap; }
+    @keyframes scroll { to { transform: translateX(-50%); } }
 
     /* Stats */
     .stats { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -85,9 +131,11 @@
     .stat span { font-size: 14px; color: var(--muted); }
 
     /* Sections */
-    section { padding: 96px 0 0; }
+    section { padding: 112px 0 0; }
     .eyebrow { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
-    h2 { font-size: clamp(38px, 5vw, 60px); line-height: 1.05; margin-bottom: 40px; }
+    h2 { font-size: clamp(38px, 5vw, 60px); line-height: 1.05; margin-bottom: 20px; }
+    .intro { color: var(--muted); max-width: 640px; margin-bottom: 44px; font-size: 18px; }
+    h3.sub { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -.02em; margin: 72px 0 8px; }
 
     /* Work */
     .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
@@ -99,8 +147,8 @@
     .tab[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px 20px; align-items: start; }
     .card { display: block; width: 100%; cursor: pointer; background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; }
-    .thumb { position: relative; overflow: hidden; border-radius: 10px; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #1d1d21, #121214); border: 1px solid var(--line); }
-    .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s, opacity .3s; opacity: .9; }
+    .thumb { position: relative; overflow: hidden; border-radius: 10px; aspect-ratio: 16 / 9; background: linear-gradient(135deg, var(--bg-3), var(--bg-2)); border: 1px solid var(--line); }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s, opacity .3s; opacity: .92; }
     .thumb::after {
       content: ""; position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px;
       border-radius: 50%; background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E") center / 24px no-repeat;
@@ -111,6 +159,34 @@
     .card h3 { font-size: 16px; font-weight: 500; margin-top: 12px; line-height: 1.4; }
     .card p { font-size: 13px; color: var(--muted); margin-top: 4px; }
     .more { margin-top: 36px; text-align: center; }
+    .more .btn { display: inline-flex; }
+
+    /* Vertical videos */
+    .reel-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 240px); gap: 20px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+    .reel-row .card { scroll-snap-align: start; }
+    .reel-row .thumb { aspect-ratio: 9 / 16; border-radius: 18px; }
+
+    /* Process */
+    .steps { border-top: 1px solid var(--line); counter-reset: step; }
+    .step { display: grid; grid-template-columns: 72px 260px 1fr 300px; gap: 24px; align-items: center; padding: 28px 0; border-bottom: 1px solid var(--line); }
+    .step::before {
+      counter-increment: step; content: "0" counter(step);
+      font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700;
+      font-size: 34px; letter-spacing: -.03em; color: var(--accent);
+    }
+    .step h4 { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 24px; letter-spacing: -.02em; line-height: 1.15; }
+    .step p { color: var(--muted); font-size: 16px; }
+    .step .chips { justify-content: flex-end; }
+    .step .chips span { font-size: 13.5px; padding: 5px 12px; }
+    .process-cta { margin-top: 28px; }
+
+    /* Services */
+    .services { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .service { display: grid; grid-template-columns: 56px 1fr; gap: 20px; padding: 30px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-2); }
+    .service .ico { width: 56px; height: 56px; border-radius: 14px; background: var(--bg-3); display: grid; place-items: center; color: var(--accent); }
+    .service .ico svg { width: 26px; height: 26px; }
+    .service h4 { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 22px; letter-spacing: -.02em; margin-bottom: 6px; }
+    .service p { color: var(--muted); font-size: 15.5px; }
 
     /* Experience */
     .jobs { border-top: 1px solid var(--line); }
@@ -130,6 +206,7 @@
     .box li { margin-bottom: 4px; }
     .box small { color: var(--muted); }
     .box p { color: var(--muted); font-size: 15px; }
+    .box p b { color: var(--text); font-weight: 500; }
     .box.wide { grid-column: 1 / -1; }
     .ai-groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     .group { display: block; font-size: 14px; color: var(--muted); margin-bottom: 10px; }
@@ -137,31 +214,57 @@
     .chips span { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); font-size: 15px; font-weight: 500; }
 
     /* Contact */
-    .contact { padding: 120px 0; text-align: center; }
-    .contact h2 { font-size: clamp(44px, 8vw, 104px); margin-bottom: 24px; }
-    .contact h2 em { font-style: normal; color: var(--accent); }
-    .contact .cta { justify-content: center; }
+    .contact { padding: 128px 0 112px; }
+    .contact .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+    .contact h2 { font-size: clamp(44px, 6.4vw, 88px); line-height: 1; }
+    .contact .cta { margin-top: 28px; }
+    form { display: grid; gap: 14px; }
+    label { display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
+    input, textarea {
+      font: inherit; font-size: 16px; color: var(--text); background: var(--bg-2);
+      border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; width: 100%;
+    }
+    textarea { min-height: 150px; resize: vertical; }
+    input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+    .hp { position: absolute; left: -9999px; }
+    .form-status { font-size: 15px; min-height: 1.6em; }
+    .form-status.ok { color: #2fbf71; }
+    .form-status.err { color: var(--accent); }
     footer { border-top: 1px solid var(--line); padding: 28px 0; font-size: 14px; color: var(--muted); }
     footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
     /* Player */
     dialog {
-      border: 0; padding: 0; background: transparent;
+      border: 0; padding: 0; background: transparent; overflow: visible;
       width: min(1100px, 94vw); max-width: none; margin: auto;
     }
+    dialog.vertical { width: min(420px, 90vw, calc(82vh * 9 / 16)); }
     dialog::backdrop { background: rgba(0, 0, 0, .88); }
     .player { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; }
+    dialog.vertical .player { aspect-ratio: 9 / 16; border-radius: 18px; }
     .player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     .close {
       position: absolute; top: -48px; right: 0; background: none; border: 0; color: #fff;
       font: inherit; font-size: 15px; cursor: pointer; padding: 8px;
     }
 
+    /* Scroll reveal: content stays visible without JS. */
+    .js .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s cubic-bezier(.2, .7, .2, 1); }
+    .js .reveal.in { opacity: 1; transform: none; }
+
+    @media (max-width: 1000px) {
+      .step { grid-template-columns: 56px 1fr; gap: 6px 16px; align-items: start; }
+      .step::before { grid-row: span 3; font-size: 28px; line-height: 1.1; }
+      .step .chips { justify-content: flex-start; margin-top: 10px; }
+    }
     @media (max-width: 900px) {
+      nav ul { display: none; }
       .hero .wrap { grid-template-columns: 1fr; gap: 48px; }
       .portrait { max-width: 360px; }
       .grid { grid-template-columns: repeat(2, 1fr); }
       .about { grid-template-columns: repeat(2, 1fr); }
+      .services { grid-template-columns: 1fr; }
+      .contact .wrap { grid-template-columns: 1fr; gap: 40px; }
       .stats .wrap { grid-template-columns: repeat(2, 1fr); }
       .stat:nth-child(3) { border-left: 0; padding-left: 0; }
       .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
@@ -169,19 +272,21 @@
     @media (max-width: 640px) {
       body { font-size: 16px; }
       .wrap { padding: 0 16px; }
-      nav ul { gap: 16px; font-size: 14px; }
-      nav ul li:nth-child(2), nav ul li:nth-child(3) { display: none; }
-      .logo { font-size: 15px; white-space: nowrap; }
+      .logo { font-size: 16px; }
       .hero { padding: 56px 0 56px; }
       .grid, .about, .ai-groups { grid-template-columns: 1fr; }
+      .clients .wrap { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .marquee { width: 100%; }
       .job { grid-template-columns: 1fr; gap: 6px; }
+      .service { grid-template-columns: 1fr; padding: 24px; }
       .stat { padding: 24px 12px; }
       .stat b { font-size: 40px; }
-      section { padding-top: 72px; }
+      section { padding-top: 80px; }
     }
     @media (prefers-reduced-motion: reduce) {
       * { animation: none !important; transition: none !important; }
       html { scroll-behavior: auto; }
+      .js .reveal { opacity: 1; transform: none; }
     }
   </style>
 </head>
@@ -190,29 +295,39 @@
 <nav>
   <div class="wrap">
     <a class="logo" href="#top">Ahmet Anıl Demirhan<span>.</span></a>
-    <ul>
-      <li><a href="#work">Work</a></li>
-      <li><a href="#experience">Experience</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
+    <div class="nav-right">
+      <ul>
+        <li><a href="#work" data-i18n="nav.work">Work</a></li>
+        <li><a href="#process" data-i18n="nav.process">AI Process</a></li>
+        <li><a href="#services" data-i18n="nav.services">Services</a></li>
+        <li><a href="#experience" data-i18n="nav.experience">Experience</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+      </ul>
+      <div class="toggles">
+        <button class="icon-btn" id="langBtn" type="button" aria-label="Türkçe / English">TR</button>
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="Toggle light / dark theme">
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+      </div>
+    </div>
   </div>
 </nav>
 
 <header class="hero" id="top">
   <div class="wrap">
     <div>
-      <div class="rec">Senior Video Editor · Istanbul</div>
-      <h1 class="serif">Stories that <em>hold</em> attention. Ads that <em>convert</em>.</h1>
-      <p class="lead">
+      <div class="rec" data-i18n="hero.tag">Senior Video Editor · AI Video · Istanbul</div>
+      <h1 class="serif" data-i18n="hero.title">Stories that <em>hold</em> attention. Ads that <em>convert</em>.</h1>
+      <p class="lead" data-i18n="hero.lead">
         8+ years cutting video for digital publishers and D2C brands — from high-volume
         Meta &amp; YouTube ad creatives to documentary-style storytelling and motion design
         in After Effects. I build generative AI workflows — language, image and video
         models — to move faster without cutting corners.
       </p>
       <div class="cta">
-        <a class="btn primary" href="#work">Watch my work</a>
-        <a class="btn ghost" href="mailto:aanildemirhan@gmail.com">Get in touch</a>
+        <a class="btn primary" href="#work" data-i18n="hero.watch">Watch my work</a>
+        <a class="btn ghost" href="#contact" data-i18n="hero.contact">Get in touch</a>
       </div>
     </div>
     <div class="portrait">
@@ -221,95 +336,181 @@
   </div>
 </header>
 
+<div class="clients" aria-label="Brands I've worked with">
+  <div class="wrap">
+    <span class="label" data-i18n="clients.label">Worked with</span>
+    <div class="marquee">
+      <div class="marquee-track">
+        <span>Interesting Engineering</span><span>Cointelegraph</span><span>Sheesha Finance</span><span>VShred</span><span>Milliyet</span><span>Posta</span><span>Kendago</span><span>BeezB</span>
+        <span aria-hidden="true">Interesting Engineering</span><span aria-hidden="true">Cointelegraph</span><span aria-hidden="true">Sheesha Finance</span><span aria-hidden="true">VShred</span><span aria-hidden="true">Milliyet</span><span aria-hidden="true">Posta</span><span aria-hidden="true">Kendago</span><span aria-hidden="true">BeezB</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="stats">
   <div class="wrap">
-    <div class="stat"><b>8+</b><span>years editing video</span></div>
-    <div class="stat"><b>200M+</b><span>total views delivered</span></div>
-    <div class="stat"><b>18M+</b><span>subscribers reached at Interesting Engineering</span></div>
-    <div class="stat"><b>50+</b><span>ad creatives per month for Meta &amp; YouTube</span></div>
+    <div class="stat"><b>8+</b><span data-i18n="stats.years">years editing video</span></div>
+    <div class="stat"><b>200M+</b><span data-i18n="stats.views">total views delivered</span></div>
+    <div class="stat"><b>18M+</b><span data-i18n="stats.subs">subscribers reached at Interesting Engineering</span></div>
+    <div class="stat"><b>50+</b><span data-i18n="stats.ads">ad creatives per month for Meta &amp; YouTube</span></div>
   </div>
 </div>
 
 <section id="work">
   <div class="wrap">
-    <div class="eyebrow">Selected work</div>
-    <h2 class="serif">Things I've cut.</h2>
+    <div class="reveal">
+      <div class="eyebrow" data-i18n="work.eyebrow">Selected work</div>
+      <h2 class="serif" data-i18n="work.title">Things I've cut.</h2>
+      <p class="intro" data-i18n="work.intro">Performance ads, AI-generated video, science explainers, motion graphics and interviews.</p>
+    </div>
     <div class="tabs" role="tablist">
-      <button class="tab" role="tab" aria-selected="true" data-filter="all">All</button>
-      <button class="tab" role="tab" aria-selected="false" data-filter="ads">Performance Ads</button>
-      <button class="tab" role="tab" aria-selected="false" data-filter="ai">AI Video</button>
+      <button class="tab" role="tab" aria-selected="true" data-filter="all" data-i18n="tab.all">All</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="ads" data-i18n="tab.ads">Performance Ads</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="ai" data-i18n="tab.ai">AI Video</button>
       <button class="tab" role="tab" aria-selected="false" data-filter="ie">Interesting Engineering</button>
-      <button class="tab" role="tab" aria-selected="false" data-filter="motion">Motion &amp; Promo</button>
-      <button class="tab" role="tab" aria-selected="false" data-filter="tr">Interviews</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="motion" data-i18n="tab.motion">Motion &amp; Promo</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="tr" data-i18n="tab.tr">Interviews</button>
     </div>
     <div class="grid" id="grid"></div>
-    <div class="more"><button class="btn ghost" id="showMore" type="button">Show more</button></div>
+    <div class="more"><button class="btn ghost" id="showMore" type="button" data-i18n="work.more">Show more</button></div>
+
+    <h3 class="sub reveal" data-i18n="social.title">Social &amp; vertical</h3>
+    <p class="intro reveal" data-i18n="social.intro">Short-form cuts built for TikTok, Reels and Shorts.</p>
+    <div class="reel-row" id="reels"></div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow" data-i18n="process.eyebrow">AI workflow</div>
+      <h2 class="serif" data-i18n="process.title">How I make <em>AI video</em>.</h2>
+      <p class="intro" data-i18n="process.intro">Generative models are only as good as the editor steering them. This is the pipeline I use to take an idea to a finished, platform-ready ad.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <h4 data-i18n="step1.t">Concept &amp; script</h4>
+        <p data-i18n="step1.d">Research angles, hooks and offers, then turn them into scripts and shot lists.</p>
+        <div class="chips"><span>ChatGPT</span><span>Claude</span></div>
+      </div>
+      <div class="step reveal">
+        <h4 data-i18n="step2.t">Look development</h4>
+        <p data-i18n="step2.d">Style frames, characters and product shots with a consistent look across scenes.</p>
+        <div class="chips"><span>Nano Banana</span><span>Seedream</span><span>Magnific</span></div>
+      </div>
+      <div class="step reveal">
+        <h4 data-i18n="step3.t">Motion</h4>
+        <p data-i18n="step3.d">Image-to-video shots, camera moves and character performance.</p>
+        <div class="chips"><span>Veo</span><span>Kling</span><span>Higgsfield</span></div>
+      </div>
+      <div class="step reveal">
+        <h4 data-i18n="step4.t">Voice &amp; music</h4>
+        <p data-i18n="step4.d">Voiceovers, character voices and original music that fit the brand.</p>
+        <div class="chips"><span>ElevenLabs</span><span>Suno</span></div>
+      </div>
+      <div class="step reveal">
+        <h4 data-i18n="step5.t">Edit &amp; finish</h4>
+        <p data-i18n="step5.d">Cut, motion graphics and sound design, then versions for 9:16, 4:5 and 16:9 and hook/CTA variations for testing.</p>
+        <div class="chips"><span>Premiere Pro</span><span>After Effects</span></div>
+      </div>
+    </div>
+    <div class="process-cta reveal"><a class="btn ghost" href="#work" id="seeAi" data-i18n="process.cta">See AI work →</a></div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow" data-i18n="services.eyebrow">Services</div>
+      <h2 class="serif" data-i18n="services.title">What I can do for you.</h2>
+    </div>
+    <div class="services">
+      <div class="service reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/></svg></div>
+        <div><h4 data-i18n="sv1.t">Performance ad creatives</h4><p data-i18n="sv1.d">Direct-response ads for Meta, YouTube and CTV — built around hooks, angles and offers, with variations ready for A/B testing.</p></div>
+      </div>
+      <div class="service reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></div>
+        <div><h4 data-i18n="sv2.t">AI video production</h4><p data-i18n="sv2.d">AI characters, avatars, product visuals and full AI-generated ads — from concept to final edit.</p></div>
+      </div>
+      <div class="service reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div><h4 data-i18n="sv3.t">Motion design &amp; explainers</h4><p data-i18n="sv3.d">Animated explainers, promos and templated social content in After Effects.</p></div>
+      </div>
+      <div class="service reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></div>
+        <div><h4 data-i18n="sv4.t">Documentary &amp; long-form</h4><p data-i18n="sv4.d">Story-driven editing for YouTube explainers, interviews and mini-documentaries.</p></div>
+      </div>
+    </div>
   </div>
 </section>
 
 <section id="experience">
   <div class="wrap">
-    <div class="eyebrow">Experience</div>
-    <h2 class="serif">Where I've worked.</h2>
+    <div class="reveal">
+      <div class="eyebrow" data-i18n="exp.eyebrow">Experience</div>
+      <h2 class="serif" data-i18n="exp.title">Where I've worked.</h2>
+    </div>
     <div class="jobs">
-      <div class="job">
-        <div class="when">Jun 2026 — Present</div>
+      <div class="job reveal">
+        <div class="when" data-i18n="j1.when">Jun 2026 — Present</div>
         <div>
           <h3>BeezB</h3>
           <div class="role">Motion Designer / Video Editor</div>
           <ul>
-            <li>Creating motion-driven video content and ad creatives for D2C brands.</li>
-            <li>Built generative AI pipelines — LLMs plus image and video generation models — for ideation, production and automating exports, captioning, review handoffs and asset organization.</li>
+            <li data-i18n="j1.b1">Creating motion-driven video content and ad creatives for D2C brands.</li>
+            <li data-i18n="j1.b2">Built generative AI pipelines — LLMs plus image and video generation models — for ideation, production and automating exports, captioning, review handoffs and asset organization.</li>
           </ul>
         </div>
       </div>
-      <div class="job">
-        <div class="when">Apr 2023 — Feb 2026</div>
+      <div class="job reveal">
+        <div class="when" data-i18n="j2.when">Apr 2023 — Feb 2026</div>
         <div>
           <h3>Kendago</h3>
-          <div class="role">Senior Video Editor · D2C Marketing Agency</div>
+          <div class="role" data-i18n="j2.role">Senior Video Editor · D2C Marketing Agency</div>
           <ul>
-            <li>Produced 50+ direct-response ad creatives per month for Meta and YouTube funnels (VShred, HBI, Svelte), supporting campaigns responsible for millions in paid ad spend.</li>
-            <li>Collaborated with PPC managers and creative leads to develop and implement video concepts.</li>
-            <li>Ran structured testing: A/B variations, angle, hook, core offer and CTA tests, plus CTV adaptations.</li>
-            <li>Analyzed CPA, ROAS and conversion rates to guide creative iterations.</li>
+            <li data-i18n="j2.b1">Produced 50+ direct-response ad creatives per month for Meta and YouTube funnels (VShred, HBI, Svelte), supporting campaigns responsible for millions in paid ad spend.</li>
+            <li data-i18n="j2.b2">Collaborated with PPC managers and creative leads to develop and implement video concepts.</li>
+            <li data-i18n="j2.b3">Ran structured testing: A/B variations, angle, hook, core offer and CTA tests, plus CTV adaptations.</li>
+            <li data-i18n="j2.b4">Analyzed CPA, ROAS and conversion rates to guide creative iterations.</li>
           </ul>
         </div>
       </div>
-      <div class="job">
-        <div class="when">Mar 2022 — Mar 2023</div>
+      <div class="job reveal">
+        <div class="when" data-i18n="j3.when">Mar 2022 — Mar 2023</div>
         <div>
           <h3>Sheesha Finance &amp; Cointelegraph</h3>
-          <div class="role">Video Animator / Editor · Contract</div>
+          <div class="role" data-i18n="j3.role">Video Animator / Editor · Contract</div>
           <ul>
-            <li>Produced motion-driven promotional videos and marketing content for Web3 and crypto brands.</li>
-            <li>Created short-form promos combining motion graphics, voiceover, 3D elements and music.</li>
-            <li>Built adaptable video templates for multi-platform social campaigns.</li>
-            <li>Worked with fully remote international teams (50+ members) on tight schedules.</li>
+            <li data-i18n="j3.b1">Produced motion-driven promotional videos and marketing content for Web3 and crypto brands.</li>
+            <li data-i18n="j3.b2">Created short-form promos combining motion graphics, voiceover, 3D elements and music.</li>
+            <li data-i18n="j3.b3">Built adaptable video templates for multi-platform social campaigns.</li>
+            <li data-i18n="j3.b4">Worked with fully remote international teams (50+ members) on tight schedules.</li>
           </ul>
         </div>
       </div>
-      <div class="job">
-        <div class="when">Apr 2021 — Mar 2022</div>
+      <div class="job reveal">
+        <div class="when" data-i18n="j4.when">Apr 2021 — Mar 2022</div>
         <div>
           <h3>Interesting Engineering</h3>
           <div class="role">Senior Video Editor</div>
           <ul>
-            <li>Produced videos for Interesting Engineering and its brands, reaching 18M+ subscribers across social platforms.</li>
-            <li>Edited mini-documentary style content with cross-disciplinary teams.</li>
-            <li>Delivered high-quality videos under tight deadlines, contributing to 200M+ total views.</li>
+            <li data-i18n="j4.b1">Produced videos for Interesting Engineering and its brands, reaching 18M+ subscribers across social platforms.</li>
+            <li data-i18n="j4.b2">Edited mini-documentary style content with cross-disciplinary teams.</li>
+            <li data-i18n="j4.b3">Delivered high-quality videos under tight deadlines, contributing to 200M+ total views.</li>
           </ul>
         </div>
       </div>
-      <div class="job">
-        <div class="when">Jul 2018 — Apr 2021</div>
+      <div class="job reveal">
+        <div class="when" data-i18n="j5.when">Jul 2018 — Apr 2021</div>
         <div>
           <h3>Milliyet.com.tr &amp; Posta.com.tr</h3>
           <div class="role">Videographer</div>
           <ul>
-            <li>Produced daily video content for digital media brands reaching 60–100M+ monthly users.</li>
-            <li>Managed end-to-end production: planning, editing, publishing and scheduling.</li>
-            <li>Developed content for web and YouTube channels — Molatik, PembeNar, Milliyet Teknoloji, Posta TV.</li>
+            <li data-i18n="j5.b1">Produced daily video content for digital media brands reaching 60–100M+ monthly users.</li>
+            <li data-i18n="j5.b2">Managed end-to-end production: planning, editing, publishing and scheduling.</li>
+            <li data-i18n="j5.b3">Developed content for web and YouTube channels — Molatik, PembeNar, Milliyet Teknoloji, Posta TV.</li>
           </ul>
         </div>
       </div>
@@ -319,59 +520,61 @@
 
 <section id="about">
   <div class="wrap">
-    <div class="eyebrow">Toolkit &amp; background</div>
-    <h2 class="serif">The rest of the story.</h2>
+    <div class="reveal">
+      <div class="eyebrow" data-i18n="about.eyebrow">Toolkit &amp; background</div>
+      <h2 class="serif" data-i18n="about.title">The rest of the story.</h2>
+    </div>
     <div class="about">
-      <div class="box wide">
-        <h3>Generative AI toolkit</h3>
+      <div class="box wide reveal">
+        <h3 data-i18n="about.ai">Generative AI toolkit</h3>
         <div class="ai-groups">
           <div>
-            <span class="group">Language models</span>
+            <span class="group" data-i18n="g.lang">Language models</span>
             <div class="chips"><span>ChatGPT</span><span>Claude</span></div>
           </div>
           <div>
-            <span class="group">Image generation</span>
+            <span class="group" data-i18n="g.image">Image generation</span>
             <div class="chips"><span>Nano Banana</span><span>Seedream</span></div>
           </div>
           <div>
-            <span class="group">Video generation</span>
+            <span class="group" data-i18n="g.video">Video generation</span>
             <div class="chips"><span>Veo</span><span>Kling</span></div>
           </div>
           <div>
-            <span class="group">Voice &amp; music</span>
+            <span class="group" data-i18n="g.voice">Voice &amp; music</span>
             <div class="chips"><span>ElevenLabs</span><span>Suno</span></div>
           </div>
           <div>
-            <span class="group">Creative AI platforms</span>
+            <span class="group" data-i18n="g.platforms">Creative AI platforms</span>
             <div class="chips"><span>Magnific</span><span>Higgsfield</span></div>
           </div>
         </div>
       </div>
-      <div class="box">
-        <h3>Editing &amp; motion</h3>
+      <div class="box reveal">
+        <h3 data-i18n="about.edit">Editing &amp; motion</h3>
         <ul>
           <li>Adobe Creative Suite</li>
           <li>After Effects</li>
           <li>Animation Composer</li>
         </ul>
       </div>
-      <div class="box">
-        <h3>Languages</h3>
+      <div class="box reveal">
+        <h3 data-i18n="about.langs">Languages</h3>
         <ul>
-          <li>English <small>· Professional</small></li>
-          <li>Turkish <small>· Native</small></li>
+          <li data-i18n="about.en">English <small>· Professional</small></li>
+          <li data-i18n="about.tr">Turkish <small>· Native</small></li>
         </ul>
       </div>
-      <div class="box">
-        <h3>Education</h3>
+      <div class="box reveal">
+        <h3 data-i18n="about.edu">Education</h3>
         <ul>
-          <li>BA in Linguistics</li>
-          <li><small>Istanbul University · 2018</small></li>
+          <li data-i18n="about.ba">BA in Linguistics</li>
+          <li><small data-i18n="about.uni">Istanbul University · 2018</small></li>
         </ul>
       </div>
-      <div class="box">
-        <h3>Volunteering</h3>
-        <p><b style="color:var(--text);font-weight:500">Dreams Academy — AYDER.</b> Five months of leadership and social media work alongside people with every kind of disability.</p>
+      <div class="box reveal">
+        <h3 data-i18n="about.vol">Volunteering</h3>
+        <p data-i18n="about.vold"><b>Dreams Academy — AYDER.</b> Five months of leadership and social media work alongside people with every kind of disability.</p>
       </div>
     </div>
   </div>
@@ -379,29 +582,42 @@
 
 <section class="contact" id="contact">
   <div class="wrap">
-    <div class="eyebrow">Contact</div>
-    <h2 class="serif">Have a project? <em>Let's talk.</em></h2>
-    <div class="cta">
-      <a class="btn primary" href="mailto:aanildemirhan@gmail.com">aanildemirhan@gmail.com</a>
-      <a class="btn ghost" href="https://www.linkedin.com/in/ahmet-an%C4%B1l-demirhan/" target="_blank" rel="noopener">LinkedIn</a>
+    <div class="reveal">
+      <div class="eyebrow" data-i18n="contact.eyebrow">Contact</div>
+      <h2 class="serif" data-i18n="contact.title">Have a project? <em>Let's talk.</em></h2>
+      <div class="cta">
+        <a class="btn primary" href="mailto:aanildemirhan@gmail.com">aanildemirhan@gmail.com</a>
+        <a class="btn ghost" href="https://www.linkedin.com/in/ahmet-an%C4%B1l-demirhan/" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
     </div>
+    <form id="contactForm" class="reveal" action="https://formsubmit.co/aanildemirhan@gmail.com" method="POST">
+      <input type="hidden" name="_subject" value="New message from your portfolio">
+      <input type="hidden" name="_template" value="table">
+      <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label><span data-i18n="form.name">Name</span><input name="name" required autocomplete="name"></label>
+      <label><span data-i18n="form.email">Email</span><input name="email" type="email" required autocomplete="email"></label>
+      <label><span data-i18n="form.msg">Message</span><textarea name="message" required></textarea></label>
+      <div><button class="btn primary" type="submit" data-i18n="form.send">Send message</button></div>
+      <p class="form-status" id="formStatus" role="status"></p>
+    </form>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
     <span>© <span id="year">2026</span> Ahmet Anıl Demirhan</span>
-    <span>Istanbul, Turkey</span>
+    <span data-i18n="footer.loc">Istanbul, Turkey</span>
   </div>
 </footer>
 
 <dialog id="player" aria-label="Video player">
-  <button class="close" id="close" type="button">Close ✕</button>
+  <button class="close" id="close" type="button" data-i18n="player.close">Close ✕</button>
   <div class="player" id="frame"></div>
 </dialog>
 
 <script>
   // Each entry: [source, id, title, category]. source "gd" = Google Drive, "yt" = YouTube.
+  // Category "social" = vertical videos shown in the "Social & vertical" row.
   const videos = [
     // Performance ads (Kendago)
     ["gd", "1eEIGhpaQalp_2YZss0ATCWoCbRARMluo", "Top-performing ad #1 — VShred quiz funnel", "ads"],
@@ -459,9 +675,9 @@
     ["gd", "1XUudq1sTLsr0_prn1Ijd5za7qmhOZSKK", "Sheesha Finance — Equity Raise explainer", "motion"],
     ["gd", "18NZuCuDscyMZhskbjOf5h2ZdzEU2OTg9", "Sheesha Finance — DeFi Staking", "motion"],
     ["gd", "1_GbWgpV8zFy_M5ly6kHb9SZPAd-nblJB", "Sheesha Finance — How to swap", "motion"],
-    ["gd", "1nQm7ahUmaIdgcDkdOsuVPROEp49h8mdc", "What is a rug pull? — TikTok explainer", "motion"],
-    ["gd", "1hEBFs6R9opB8DixEQ_di9NCPoEjONMuU", "What does a rug pull look like? — TikTok explainer", "motion"],
-    ["gd", "16IF0oPRLZZx56eUKclW_pGn-_x1SHZg5", "How to know a project is a rug pull — TikTok explainer", "motion"],
+    ["gd", "1nQm7ahUmaIdgcDkdOsuVPROEp49h8mdc", "What is a rug pull? — TikTok explainer", "social"],
+    ["gd", "1hEBFs6R9opB8DixEQ_di9NCPoEjONMuU", "What does a rug pull look like? — TikTok explainer", "social"],
+    ["gd", "16IF0oPRLZZx56eUKclW_pGn-_x1SHZg5", "How to know a project is a rug pull — TikTok explainer", "social"],
     ["gd", "1bJ4hoEJwiYE7gjkiJmOnyryBuzmaXsXv", "Rootangle — Promo", "motion"],
     ["gd", "1i2qXQyi5fgYwQy9lg2gfkiIuBVVxhqMH", "Slow Türk — Promo", "motion"],
     ["gd", "1H4rdLSO-T64k_oZ-28pwUhbu7RC_qjLb", "Collab Reveal", "motion"],
@@ -479,13 +695,6 @@
     ["yt", "NB662XW7Oj8", "İki Dakika — maNga", "tr"],
     ["yt", "1YV63XYlgbk", "Çetin Çetintaş: Bir Yoginin Hikayesi", "tr"]
   ];
-  const labels = {
-    ads: "Performance Ads · Kendago",
-    ai: "AI Video",
-    ie: "Interesting Engineering",
-    motion: "Motion & Promo",
-    tr: "Milliyet · Molatik"
-  };
   // Show a mixed selection first so the "All" view isn't only one client.
   const featured = [
     "1eEIGhpaQalp_2YZss0ATCWoCbRARMluo", "123Gh-NNnEUnTaNWPeGXMknIFwYtRA9Y2", "1eTus0-Eg_U7TNooIdwFVpkdXgBSRgkxV",
@@ -493,8 +702,149 @@
     "12lZfEtjoI7pUZ-2l2leSVi2RlOXw6sS-", "1HR_Dr7uBVm5UMhQZJ1LwLrhaTUpzOEAC", "8kMfD2rMlJk"
   ];
   const STEP = 9;
-  const dead = new Set();
 
+  // ---------- Language ----------
+  const TR = {
+    "nav.work": "İşler",
+    "nav.process": "AI Süreci",
+    "nav.services": "Hizmetler",
+    "nav.experience": "Deneyim",
+    "nav.contact": "İletişim",
+    "hero.tag": "Kıdemli Video Editörü · AI Video · İstanbul",
+    "hero.title": "Dikkati <em>tutan</em> hikâyeler. <em>Satan</em> reklamlar.",
+    "hero.lead": "Dijital yayıncılar ve D2C markalar için 8 yılı aşkın video kurgu deneyimi — yüksek hacimli Meta ve YouTube reklamlarından belgesel tadında hikâye anlatımına ve After Effects ile motion tasarıma. Dil, görsel ve video modellerinden oluşan üretken yapay zekâ iş akışları kurarak kaliteden ödün vermeden daha hızlı üretiyorum.",
+    "hero.watch": "İşlerimi izle",
+    "hero.contact": "İletişime geç",
+    "clients.label": "Çalıştığım markalar",
+    "stats.years": "yıl video kurgu",
+    "stats.views": "toplam izlenme",
+    "stats.subs": "Interesting Engineering'de ulaşılan abone",
+    "stats.ads": "Meta ve YouTube için aylık reklam videosu",
+    "work.eyebrow": "Seçili işler",
+    "work.title": "Kurguladıklarım.",
+    "work.intro": "Performans reklamları, yapay zekâ ile üretilmiş videolar, bilim anlatımları, motion grafikler ve röportajlar.",
+    "work.more": "Daha fazla göster",
+    "tab.all": "Tümü",
+    "tab.ads": "Performans Reklamları",
+    "tab.ai": "AI Video",
+    "tab.motion": "Motion ve Tanıtım",
+    "tab.tr": "Röportajlar",
+    "social.title": "Sosyal medya ve dikey",
+    "social.intro": "TikTok, Reels ve Shorts için kısa formatlı kurgular.",
+    "process.eyebrow": "AI iş akışı",
+    "process.title": "<em>AI video</em> nasıl yapıyorum.",
+    "process.intro": "Üretken modeller, onları yöneten editör kadar iyidir. Bir fikri bitmiş, platforma hazır bir reklama dönüştürmek için kullandığım süreç bu.",
+    "step1.t": "Konsept ve senaryo",
+    "step1.d": "Açıları, hook'ları ve teklifleri araştırıp senaryo ve çekim listesine dönüştürüyorum.",
+    "step2.t": "Görsel dünya",
+    "step2.d": "Sahneler boyunca tutarlı görünen stil kareleri, karakterler ve ürün görselleri.",
+    "step3.t": "Hareket",
+    "step3.d": "Görselden videoya çekimler, kamera hareketleri ve karakter performansı.",
+    "step4.t": "Ses ve müzik",
+    "step4.d": "Markaya uygun seslendirmeler, karakter sesleri ve özgün müzik.",
+    "step5.t": "Kurgu ve son dokunuş",
+    "step5.d": "Kurgu, motion grafik ve ses tasarımı; ardından 9:16, 4:5 ve 16:9 versiyonları ile test için hook/CTA varyasyonları.",
+    "process.cta": "AI işlerimi gör →",
+    "services.eyebrow": "Hizmetler",
+    "services.title": "Sizin için neler yapabilirim.",
+    "sv1.t": "Performans reklamları",
+    "sv1.d": "Meta, YouTube ve CTV için hook, açı ve teklif odaklı direct-response reklamlar; A/B testine hazır varyasyonlarla.",
+    "sv2.t": "AI video prodüksiyon",
+    "sv2.d": "AI karakterler, avatarlar, ürün görselleri ve tamamen yapay zekâ ile üretilmiş reklamlar — fikirden son kurguya.",
+    "sv3.t": "Motion tasarım ve anlatım videoları",
+    "sv3.d": "After Effects ile animasyonlu anlatım videoları, tanıtımlar ve şablon tabanlı sosyal medya içerikleri.",
+    "sv4.t": "Belgesel ve uzun format",
+    "sv4.d": "YouTube anlatım videoları, röportajlar ve mini belgeseller için hikâye odaklı kurgu.",
+    "exp.eyebrow": "Deneyim",
+    "exp.title": "Çalıştığım yerler.",
+    "j1.when": "Haz 2026 — Halen",
+    "j1.b1": "D2C markalar için motion odaklı video içerikler ve reklamlar üretiyorum.",
+    "j1.b2": "Fikir geliştirme, prodüksiyon ve export, altyazı, teslim ve dosya düzenleme işlerini otomatikleştirmek için dil modelleri ile görsel ve video üretim modellerinden oluşan yapay zekâ iş akışları kurdum.",
+    "j2.when": "Nis 2023 — Şub 2026",
+    "j2.role": "Kıdemli Video Editörü · D2C Pazarlama Ajansı",
+    "j2.b1": "Meta ve YouTube funnel'ları için ayda 50'den fazla direct-response reklam videosu ürettim (VShred, HBI, Svelte); milyonlarca dolarlık reklam bütçesi yöneten kampanyalara katkı sağladım.",
+    "j2.b2": "PPC yöneticileri ve kreatif liderlerle birlikte video konseptleri geliştirip hayata geçirdim.",
+    "j2.b3": "Yapılandırılmış testler yürüttüm: A/B varyasyonları, açı, hook, teklif ve CTA testleri ile CTV uyarlamaları.",
+    "j2.b4": "Kreatif iterasyonlara yön vermek için CPA, ROAS ve dönüşüm oranlarını analiz ettim.",
+    "j3.when": "Mar 2022 — Mar 2023",
+    "j3.role": "Video Animatör / Editör · Sözleşmeli",
+    "j3.b1": "Web3 ve kripto markaları için motion odaklı tanıtım videoları ve pazarlama içerikleri ürettim.",
+    "j3.b2": "Motion grafik, seslendirme, 3D öğeler ve müziği birleştiren kısa tanıtımlar hazırladım.",
+    "j3.b3": "Çok platformlu sosyal medya kampanyaları için uyarlanabilir video şablonları oluşturdum.",
+    "j3.b4": "Tamamen uzaktan çalışan uluslararası ekiplerle (50+ kişi) sıkı takvimlerle çalıştım.",
+    "j4.when": "Nis 2021 — Mar 2022",
+    "j4.b1": "Interesting Engineering ve markaları için sosyal platformlarda 18 milyonu aşkın aboneye ulaşan videolar ürettim.",
+    "j4.b2": "Farklı disiplinlerden ekiplerle mini belgesel tarzı içerikler kurguladım.",
+    "j4.b3": "Sıkı teslim tarihlerinde yüksek kaliteli videolar teslim ederek toplam 200 milyonu aşkın izlenmeye katkı sağladım.",
+    "j5.when": "Tem 2018 — Nis 2021",
+    "j5.b1": "Aylık 60–100 milyonu aşkın kullanıcıya ulaşan dijital medya markaları için günlük video içerik ürettim.",
+    "j5.b2": "Planlama, kurgu, yayın ve zamanlama dahil uçtan uca prodüksiyon süreçlerini yönettim.",
+    "j5.b3": "Web ve YouTube kanalları için içerik geliştirdim — Molatik, PembeNar, Milliyet Teknoloji, Posta TV.",
+    "about.eyebrow": "Araçlar ve geçmiş",
+    "about.title": "Hikâyenin geri kalanı.",
+    "about.ai": "Üretken yapay zekâ araçları",
+    "g.lang": "Dil modelleri",
+    "g.image": "Görsel üretimi",
+    "g.video": "Video üretimi",
+    "g.voice": "Ses ve müzik",
+    "g.platforms": "Yaratıcı AI platformları",
+    "about.edit": "Kurgu ve motion",
+    "about.langs": "Diller",
+    "about.en": "İngilizce <small>· Profesyonel</small>",
+    "about.tr": "Türkçe <small>· Ana dil</small>",
+    "about.edu": "Eğitim",
+    "about.ba": "Dilbilim Lisans",
+    "about.uni": "İstanbul Üniversitesi · 2018",
+    "about.vol": "Gönüllülük",
+    "about.vold": "<b>Dreams Academy — AYDER.</b> Her türlü engeli olan insanlarla beş ay boyunca liderlik ve sosyal medya çalışması.",
+    "contact.eyebrow": "İletişim",
+    "contact.title": "Bir projeniz mi var? <em>Konuşalım.</em>",
+    "form.name": "Ad",
+    "form.email": "E-posta",
+    "form.msg": "Mesaj",
+    "form.send": "Mesajı gönder",
+    "footer.loc": "İstanbul, Türkiye",
+    "player.close": "Kapat ✕"
+  };
+  const UI = {
+    en: {
+      labels: { ads: "Performance Ads · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion & Promo", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok" },
+      sending: "Sending…", sent: "Thanks — your message is on its way. I'll get back to you soon.",
+      failed: "Something went wrong. Please email me directly at aanildemirhan@gmail.com."
+    },
+    tr: {
+      labels: { ads: "Performans Reklamları · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion ve Tanıtım", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok" },
+      sending: "Gönderiliyor…", sent: "Teşekkürler, mesajınız ulaştı. En kısa sürede dönüş yapacağım.",
+      failed: "Bir sorun oluştu. Lütfen doğrudan aanildemirhan@gmail.com adresine yazın."
+    }
+  };
+  let lang = "en";
+  const i18nEls = document.querySelectorAll("[data-i18n]");
+  i18nEls.forEach(el => { el.dataset.en = el.innerHTML; });
+
+  function setLang(next) {
+    lang = next;
+    document.documentElement.lang = lang;
+    i18nEls.forEach(el => {
+      const tr = TR[el.dataset.i18n];
+      el.innerHTML = lang === "tr" && tr ? tr : el.dataset.en;
+    });
+    document.getElementById("langBtn").textContent = lang === "tr" ? "EN" : "TR";
+    try { localStorage.setItem("lang", lang); } catch (e) {}
+    render();
+  }
+
+  // ---------- Theme ----------
+  document.getElementById("themeBtn").addEventListener("click", () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === "light" ? "dark" : "light";
+    root.dataset.theme = next;
+    document.querySelector('meta[name="theme-color"]').content = next === "light" ? "#f5f3ee" : "#0c0c0d";
+    try { localStorage.setItem("theme", next); } catch (e) {}
+  });
+
+  // ---------- Work grid ----------
+  const dead = new Set();
   const thumbUrl = (src, id) => src === "yt"
     ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
     : `https://drive.google.com/thumbnail?id=${id}&sz=w640`;
@@ -503,50 +853,100 @@
     : `https://drive.google.com/file/d/${id}/preview`;
 
   const grid = document.getElementById("grid");
+  const reels = document.getElementById("reels");
   const showMore = document.getElementById("showMore");
   let filter = "all";
   let limit = STEP;
 
+  const card = ([src, id, title, cat]) => `
+      <button class="card" type="button" data-src="${src}" data-id="${id}" data-vertical="${cat === "social"}">
+        <div class="thumb"><img loading="lazy" src="${thumbUrl(src, id)}" alt="" onerror="this.remove()"></div>
+        <h3>${title}</h3>
+        <p>${UI[lang].labels[cat]}</p>
+      </button>`;
+
   function list() {
-    if (filter !== "all") return videos.filter(v => v[3] === filter);
-    const first = featured.map(id => videos.find(v => v[1] === id));
-    return first.concat(videos.filter(v => !featured.includes(v[1])));
+    const horizontal = videos.filter(v => v[3] !== "social");
+    if (filter !== "all") return horizontal.filter(v => v[3] === filter);
+    const first = featured.map(id => horizontal.find(v => v[1] === id)).filter(Boolean);
+    return first.concat(horizontal.filter(v => !featured.includes(v[1])));
   }
 
   function render() {
     const items = list().filter(v => !dead.has(v[1]));
-    grid.innerHTML = items.slice(0, limit).map(([src, id, title, cat]) => `
-      <button class="card" type="button" data-src="${src}" data-id="${id}">
-        <div class="thumb"><img loading="lazy" src="${thumbUrl(src, id)}" alt="" onerror="this.remove()"></div>
-        <h3>${title}</h3>
-        <p>${labels[cat]}</p>
-      </button>`).join("");
+    grid.innerHTML = items.slice(0, limit).map(card).join("");
     showMore.parentElement.hidden = items.length <= limit;
+    reels.innerHTML = videos.filter(v => v[3] === "social").map(card).join("");
   }
 
-  document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t === tab));
-    filter = tab.dataset.filter;
+  function selectTab(name) {
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.filter === name));
+    filter = name;
     limit = STEP;
     render();
-  }));
+  }
+  document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => selectTab(tab.dataset.filter)));
   showMore.addEventListener("click", () => { limit += STEP; render(); });
+  document.getElementById("seeAi").addEventListener("click", () => selectTab("ai"));
 
+  // ---------- Player ----------
   const dialog = document.getElementById("player");
   const frame = document.getElementById("frame");
-  grid.addEventListener("click", e => {
-    const card = e.target.closest(".card");
-    if (!card) return;
-    frame.innerHTML = `<iframe src="${playerUrl(card.dataset.src, card.dataset.id)}"
+  function openPlayer(e) {
+    const c = e.target.closest(".card");
+    if (!c) return;
+    dialog.classList.toggle("vertical", c.dataset.vertical === "true");
+    frame.innerHTML = `<iframe src="${playerUrl(c.dataset.src, c.dataset.id)}"
       allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe>`;
     dialog.showModal();
-  });
+  }
+  grid.addEventListener("click", openPlayer);
+  reels.addEventListener("click", openPlayer);
   document.getElementById("close").addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", e => { if (e.target === dialog) dialog.close(); });
   dialog.addEventListener("close", () => { frame.innerHTML = ""; });
 
+  // ---------- Contact form ----------
+  const form = document.getElementById("contactForm");
+  const status = document.getElementById("formStatus");
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    status.className = "form-status";
+    status.textContent = UI[lang].sending;
+    try {
+      const res = await fetch("https://formsubmit.co/ajax/aanildemirhan@gmail.com", {
+        method: "POST",
+        headers: { "Accept": "application/json" },
+        body: new FormData(form)
+      });
+      if (!res.ok) throw new Error(res.status);
+      form.reset();
+      status.className = "form-status ok";
+      status.textContent = UI[lang].sent;
+    } catch (err) {
+      status.className = "form-status err";
+      status.textContent = UI[lang].failed;
+    }
+  });
+
+  // ---------- Scroll reveal ----------
+  const revealEls = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(entries => entries.forEach(en => {
+      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+    }), { rootMargin: "0px 0px -8% 0px" });
+    revealEls.forEach(el => io.observe(el));
+  } else {
+    revealEls.forEach(el => el.classList.add("in"));
+  }
+
+  // ---------- Init ----------
   document.getElementById("year").textContent = new Date().getFullYear();
-  render();
+  document.getElementById("langBtn").addEventListener("click", () => setLang(lang === "tr" ? "en" : "tr"));
+  let saved = null;
+  try { saved = localStorage.getItem("lang"); } catch (e) {}
+  const initial = saved || ((navigator.language || "").toLowerCase().startsWith("tr") ? "tr" : "en");
+  if (initial === "tr") setLang("tr"); else render();
 
   // Drop YouTube videos that are no longer available: their thumbnail 404s
   // or comes back as a 120x90 placeholder.
