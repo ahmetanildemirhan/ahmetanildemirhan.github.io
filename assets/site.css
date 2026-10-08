@@ -265,7 +265,7 @@ dialog.vertical .player { aspect-ratio: 9 / 16; border-radius: 18px; }
 }
 
 /* Case study teaser on the home page */
-.cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 56px; }
+.cases { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 56px; }
 .case-feature {
   display: grid; grid-template-rows: auto 1fr; gap: 0;
   border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
@@ -276,7 +276,7 @@ dialog.vertical .player { aspect-ratio: 9 / 16; border-radius: 18px; }
 .case-feature .thumb::after { display: none; }
 .case-feature .body { padding: 24px 26px 26px; display: flex; flex-direction: column; gap: 10px; }
 .case-feature .kicker { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
-.case-feature h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 24px; letter-spacing: -.03em; line-height: 1.05; }
+.case-feature h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -.03em; line-height: 1.05; }
 .case-feature p { color: var(--muted); font-size: 15.5px; }
 .case-feature .go { font-weight: 600; margin-top: 6px; }
 
@@ -325,4 +325,18 @@ dialog.vertical .player { aspect-ratio: 9 / 16; border-radius: 18px; }
 @media (max-width: 640px) {
   .grid.four { grid-template-columns: 1fr 1fr; gap: 20px 12px; }
   .next-case { padding: 28px; }
+}
+
+/* Vertical feature video with a credits list beside it */
+.credits-hero { display: grid; grid-template-columns: 340px 1fr; gap: 64px; align-items: center; margin-top: 48px; }
+.credits-hero .feature-video { margin-top: 0; }
+.credits-hero .feature-video .thumb { aspect-ratio: 9 / 16; border-radius: 22px; }
+.credits h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; font-size: 28px; letter-spacing: -.02em; margin-bottom: 18px; }
+.credits ul { list-style: none; border-top: 1px solid var(--line); }
+.credits li { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.credits li span:first-child { color: var(--muted); }
+.credits li span:last-child { font-weight: 600; text-align: right; }
+@media (max-width: 900px) {
+  .credits-hero { grid-template-columns: 1fr; gap: 40px; }
+  .credits-hero .feature-video { max-width: 320px; }
 }

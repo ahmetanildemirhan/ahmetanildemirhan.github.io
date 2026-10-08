@@ -151,6 +151,15 @@
           <span class="go" data-i18n="case.go">Read the case study →</span>
         </div>
       </a>
+      <a class="case-feature reveal" href="work/ai-music-ad.html">
+        <div class="thumb"><img loading="lazy" src="https://drive.google.com/thumbnail?id=10JI-goMLGo03bogpzlITaFsRfMM17Gvk&amp;sz=w1000" alt="" onerror="this.remove()" style="object-position:center 30%"></div>
+        <div class="body">
+          <span class="kicker" data-i18n="case4.kicker">Case study · AI video</span>
+          <h3 data-i18n="case4.title">An AI-animated music ad, made end to end.</h3>
+          <p data-i18n="case4.desc">Original song, characters, story, Pixar-style animation, edit and end card for a GLP-1 health brand — all mine.</p>
+          <span class="go" data-i18n="case.go">Read the case study →</span>
+        </div>
+      </a>
     </div>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" data-filter="all" data-i18n="tab.all">All</button>
@@ -410,6 +419,9 @@
     "case.title": "Tek reklam, onlarca hook.",
     "case.desc": "Meta ve YouTube için modüler direct-response reklamları nasıl kurguladığımı ve her hafta yeni hook, giriş ve açıları nasıl test ettiğimizi anlatıyorum.",
     "case.go": "Vaka çalışmasını oku →",
+    "case4.kicker": "Vaka çalışması · AI video",
+    "case4.title": "Baştan sona yapay zekâ ile yapılmış animasyonlu bir müzikli reklam.",
+    "case4.desc": "Bir GLP-1 sağlık markası için özgün şarkı, karakterler, hikâye, Pixar tarzı animasyon, kurgu ve end card — hepsi bana ait.",
     "case3.kicker": "Vaka çalışması · Molatik",
     "case3.title": "Cem Yılmaz röportajı — 1M+ izlenme.",
     "case3.desc": "Kişisel ve özenle yapılmış bir röportaj kurgusu: editoryal, klip yönetimi ve her bir kesme.",
@@ -580,6 +592,7 @@
     ["gd", "1XUudq1sTLsr0_prn1Ijd5za7qmhOZSKK", "Sheesha Finance — Equity Raise explainer", "motion"],
     ["gd", "18NZuCuDscyMZhskbjOf5h2ZdzEU2OTg9", "Sheesha Finance — DeFi Staking", "motion"],
     ["gd", "1_GbWgpV8zFy_M5ly6kHb9SZPAd-nblJB", "Sheesha Finance — How to swap", "motion"],
+    ["gd", "10JI-goMLGo03bogpzlITaFsRfMM17Gvk", "Ready To Be Me Again — AI-animated music ad", "ai", true],
     ["gd", "1nQm7ahUmaIdgcDkdOsuVPROEp49h8mdc", "What is a rug pull? — TikTok explainer", "social"],
     ["gd", "1hEBFs6R9opB8DixEQ_di9NCPoEjONMuU", "What does a rug pull look like? — TikTok explainer", "social"],
     ["gd", "16IF0oPRLZZx56eUKclW_pGn-_x1SHZg5", "How to know a project is a rug pull — TikTok explainer", "social"],
@@ -630,15 +643,17 @@
   let filter = "all";
   let limit = STEP;
 
-  const card = ([src, id, title, cat]) => `
-      <button class="card" type="button" data-src="${src}" data-id="${id}" data-vertical="${cat === "social"}">
+  // A 5th entry of `true` (or the "social" category) marks a vertical video.
+  const isVertical = v => v[3] === "social" || v[4] === true;
+  const card = ([src, id, title, cat, vertical]) => `
+      <button class="card" type="button" data-src="${src}" data-id="${id}" data-vertical="${cat === "social" || vertical === true}">
         <div class="thumb"><img loading="lazy" src="${thumbUrl(src, id)}" alt="" onerror="this.remove()"></div>
         ${title ? `<h3>${title}</h3>` : ""}
         <p>${UI[site.lang].labels[cat]}</p>
       </button>`;
 
   function list() {
-    const horizontal = videos.filter(v => v[3] !== "social");
+    const horizontal = videos.filter(v => !isVertical(v));
     if (filter !== "all") return horizontal.filter(v => v[3] === filter);
     const first = featured.map(id => horizontal.find(v => v[1] === id)).filter(Boolean);
     return first.concat(horizontal.filter(v => !featured.includes(v[1])));
@@ -648,7 +663,7 @@
     const items = list().filter(v => !dead.has(v[1]));
     grid.innerHTML = items.slice(0, limit).map(card).join("");
     showMore.parentElement.hidden = items.length <= limit;
-    reels.innerHTML = videos.filter(v => v[3] === "social").map(card).join("");
+    reels.innerHTML = videos.filter(isVertical).map(card).join("");
   }
 
   function selectTab(name) {
