@@ -10,7 +10,7 @@
   <meta property="og:image" content="assets/ahmet.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0c0c0d;
@@ -27,7 +27,7 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: Inter, system-ui, sans-serif;
+      font-family: Geist, system-ui, sans-serif;
       font-size: 17px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
@@ -35,7 +35,7 @@
     a { color: inherit; }
     img { display: block; max-width: 100%; }
     .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
-    .serif { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; }
+    .serif { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; letter-spacing: -.035em; }
 
     /* Nav */
     nav {
@@ -45,7 +45,7 @@
       border-bottom: 1px solid var(--line);
     }
     nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
-    .logo { font-weight: 600; text-decoration: none; letter-spacing: .02em; }
+    .logo { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; text-decoration: none; letter-spacing: -.01em; font-size: 18px; }
     .logo span { color: var(--accent); }
     nav ul { list-style: none; display: flex; gap: 28px; font-size: 15px; }
     nav ul a { text-decoration: none; color: var(--muted); transition: color .2s; }
@@ -57,8 +57,8 @@
     .rec { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
     .rec::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); animation: blink 1.6s infinite; }
     @keyframes blink { 50% { opacity: .2; } }
-    h1 { font-size: clamp(48px, 7vw, 92px); line-height: 1; letter-spacing: -.01em; }
-    h1 em { color: var(--accent); }
+    h1 { font-size: clamp(42px, 6.2vw, 82px); line-height: .98; letter-spacing: -.028em; }
+    h1 em { font-style: normal; color: var(--accent); }
     .lead { margin-top: 28px; font-size: 19px; color: var(--muted); max-width: 560px; }
     .cta { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
     .btn {
@@ -81,7 +81,7 @@
     .stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
     .stat { padding: 36px 24px; border-left: 1px solid var(--line); }
     .stat:first-child { border-left: 0; padding-left: 0; }
-    .stat b { display: block; font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 52px; line-height: 1; }
+    .stat b { display: block; font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 600; letter-spacing: -.03em; font-size: 48px; line-height: 1; margin-bottom: 6px; }
     .stat span { font-size: 14px; color: var(--muted); }
 
     /* Sections */
@@ -134,7 +134,7 @@
     /* Contact */
     .contact { padding: 120px 0; text-align: center; }
     .contact h2 { font-size: clamp(44px, 8vw, 104px); margin-bottom: 24px; }
-    .contact h2 em { color: var(--accent); }
+    .contact h2 em { font-style: normal; color: var(--accent); }
     .contact .cta { justify-content: center; }
     footer { border-top: 1px solid var(--line); padding: 28px 0; font-size: 14px; color: var(--muted); }
     footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -202,8 +202,8 @@
       <p class="lead">
         8+ years cutting video for digital publishers and D2C brands — from high-volume
         Meta &amp; YouTube ad creatives to documentary-style storytelling and motion design
-        in After Effects. I build AI-assisted workflows with Claude to move faster
-        without cutting corners.
+        in After Effects. I build generative AI workflows — language, image and video
+        models — to move faster without cutting corners.
       </p>
       <div class="cta">
         <a class="btn primary" href="#work">Watch my work</a>
@@ -254,7 +254,7 @@
           <div class="role">Motion Designer / Video Editor</div>
           <ul>
             <li>Creating motion-driven video content and ad creatives for D2C brands.</li>
-            <li>Built AI-assisted workflows with Claude to automate exports, captioning, review handoffs and asset organization.</li>
+            <li>Built generative AI pipelines — LLMs plus image and video generation models — for ideation, production and automating exports, captioning, review handoffs and asset organization.</li>
           </ul>
         </div>
       </div>
@@ -322,7 +322,7 @@
         <ul>
           <li>Adobe Creative Suite</li>
           <li>After Effects</li>
-          <li>Claude <small>· AI workflows</small></li>
+          <li>Generative AI <small>· LLMs, image &amp; video models</small></li>
           <li>Animation Composer</li>
           <li>Envato Elements</li>
         </ul>
