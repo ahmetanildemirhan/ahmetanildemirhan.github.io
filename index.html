@@ -328,6 +328,7 @@
       <div class="cta">
         <a class="btn primary" href="#work" data-i18n="hero.watch">Watch my work</a>
         <a class="btn ghost" href="#contact" data-i18n="hero.contact">Get in touch</a>
+        <a class="btn ghost" href="assets/Ahmet-Anil-Demirhan-CV.pdf" download data-i18n="cv">Download CV</a>
       </div>
     </div>
     <div class="portrait">
@@ -588,6 +589,7 @@
       <div class="cta">
         <a class="btn primary" href="mailto:aanildemirhan@gmail.com">aanildemirhan@gmail.com</a>
         <a class="btn ghost" href="https://www.linkedin.com/in/ahmet-an%C4%B1l-demirhan/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="btn ghost" href="assets/Ahmet-Anil-Demirhan-CV.pdf" download data-i18n="cv">Download CV</a>
       </div>
     </div>
     <form id="contactForm" class="reveal" action="https://formsubmit.co/aanildemirhan@gmail.com" method="POST">
@@ -681,9 +683,9 @@
     ["gd", "1bJ4hoEJwiYE7gjkiJmOnyryBuzmaXsXv", "Rootangle — Promo", "motion"],
     ["gd", "1i2qXQyi5fgYwQy9lg2gfkiIuBVVxhqMH", "Slow Türk — Promo", "motion"],
     ["gd", "1H4rdLSO-T64k_oZ-28pwUhbu7RC_qjLb", "Collab Reveal", "motion"],
-    ["gd", "1ZcISheyoLkhFUDg4oqn-nGks0udwGmyv", "NFM", "motion"],
-    ["gd", "14xw0ufHrag8G_LG3fXt0ZVeDhEXCe1cN", "TRAI", "motion"],
-    ["gd", "1u1NuQBqh77w_dF77QT5ptyMBh9ifAhOl", "V1", "motion"],
+    ["gd", "1ZcISheyoLkhFUDg4oqn-nGks0udwGmyv", "", "motion"],
+    ["gd", "14xw0ufHrag8G_LG3fXt0ZVeDhEXCe1cN", "", "motion"],
+    ["gd", "1u1NuQBqh77w_dF77QT5ptyMBh9ifAhOl", "", "motion"],
     ["gd", "13glOzg265ga_vnKRdSUzwv7nIJn-pwy9", "AZ Coffee", "motion"],
     ["gd", "1kNQX_Ft1YKdQDOtZjAgG3ds7rh5a0Snj", "Kaya Kalpa — documentary", "motion"],
     ["gd", "1NvCzUOVF8zmrhD9ycxZNzlhn0xCay0Da", "29 Ekim", "motion"],
@@ -804,7 +806,8 @@
     "form.msg": "Mesaj",
     "form.send": "Mesajı gönder",
     "footer.loc": "İstanbul, Türkiye",
-    "player.close": "Kapat ✕"
+    "player.close": "Kapat ✕",
+    "cv": "CV'yi indir"
   };
   const UI = {
     en: {
@@ -861,7 +864,7 @@
   const card = ([src, id, title, cat]) => `
       <button class="card" type="button" data-src="${src}" data-id="${id}" data-vertical="${cat === "social"}">
         <div class="thumb"><img loading="lazy" src="${thumbUrl(src, id)}" alt="" onerror="this.remove()"></div>
-        <h3>${title}</h3>
+        ${title ? `<h3>${title}</h3>` : ""}
         <p>${UI[lang].labels[cat]}</p>
       </button>`;
 
