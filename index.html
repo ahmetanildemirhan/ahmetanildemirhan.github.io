@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ahmet Anıl Demirhan — Senior Video Editor</title>
+  <meta name="description" content="Senior Video Editor with 8+ years across digital publishing and D2C performance marketing. Meta & YouTube ad creatives, documentary storytelling, motion design.">
+  <meta property="og:title" content="Ahmet Anıl Demirhan — Senior Video Editor">
+  <meta property="og:description" content="Performance ad creatives, documentary-style storytelling and motion design. 200M+ views.">
+  <meta property="og:image" content="assets/ahmet.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0c0d;
+      --bg-2: #141416;
+      --line: #26262a;
+      --text: #f2f0ec;
+      --muted: #9a978f;
+      --accent: #ff4d2e;
+      --radius: 14px;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    img { display: block; max-width: 100%; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+    .serif { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; }
+
+    /* Nav */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(12, 12, 13, .82);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .logo { font-weight: 600; text-decoration: none; letter-spacing: .02em; }
+    .logo span { color: var(--accent); }
+    nav ul { list-style: none; display: flex; gap: 28px; font-size: 15px; }
+    nav ul a { text-decoration: none; color: var(--muted); transition: color .2s; }
+    nav ul a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero { padding: 96px 0 72px; }
+    .hero .wrap { display: grid; grid-template-columns: 1.4fr 1fr; gap: 56px; align-items: center; }
+    .rec { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+    .rec::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); animation: blink 1.6s infinite; }
+    @keyframes blink { 50% { opacity: .2; } }
+    h1 { font-size: clamp(48px, 7vw, 92px); line-height: 1; letter-spacing: -.01em; }
+    h1 em { color: var(--accent); }
+    .lead { margin-top: 28px; font-size: 19px; color: var(--muted); max-width: 560px; }
+    .cta { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      display: inline-block; padding: 13px 22px; border-radius: 999px;
+      font-size: 15px; font-weight: 600; text-decoration: none;
+      border: 1px solid var(--line); transition: transform .2s, background .2s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.ghost:hover { background: var(--bg-2); }
+    .portrait { position: relative; }
+    .portrait img { border-radius: var(--radius); filter: grayscale(1) contrast(1.05); aspect-ratio: 4 / 5; object-fit: cover; width: 100%; }
+    .portrait::after {
+      content: ""; position: absolute; inset: 14px -14px -14px 14px;
+      border: 1px solid var(--accent); border-radius: var(--radius); z-index: -1;
+    }
+
+    /* Stats */
+    .stats { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .stat { padding: 36px 24px; border-left: 1px solid var(--line); }
+    .stat:first-child { border-left: 0; padding-left: 0; }
+    .stat b { display: block; font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 52px; line-height: 1; }
+    .stat span { font-size: 14px; color: var(--muted); }
+
+    /* Sections */
+    section { padding: 96px 0 0; }
+    .eyebrow { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+    h2 { font-size: clamp(38px, 5vw, 60px); line-height: 1.05; margin-bottom: 40px; }
+
+    /* Work */
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+    .tab {
+      font: inherit; font-size: 14px; cursor: pointer;
+      padding: 9px 16px; border-radius: 999px;
+      background: transparent; color: var(--muted); border: 1px solid var(--line);
+    }
+    .tab[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px 20px; align-items: start; }
+    .card { display: block; width: 100%; cursor: pointer; background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; }
+    .thumb { position: relative; overflow: hidden; border-radius: 10px; aspect-ratio: 16 / 9; background: var(--bg-2); }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s, opacity .3s; opacity: .9; }
+    .thumb::after {
+      content: ""; position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px;
+      border-radius: 50%; background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E") center / 24px no-repeat;
+      opacity: 0; transform: scale(.8); transition: opacity .25s, transform .25s;
+    }
+    .card:hover .thumb img, .card:focus-visible .thumb img { transform: scale(1.05); opacity: 1; }
+    .card:hover .thumb::after, .card:focus-visible .thumb::after { opacity: 1; transform: scale(1); }
+    .card h3 { font-size: 16px; font-weight: 500; margin-top: 12px; line-height: 1.4; }
+    .card p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .more { margin-top: 36px; text-align: center; }
+
+    /* Experience */
+    .jobs { border-top: 1px solid var(--line); }
+    .job { display: grid; grid-template-columns: 220px 1fr; gap: 32px; padding: 36px 0; border-bottom: 1px solid var(--line); }
+    .job .when { color: var(--muted); font-size: 14px; padding-top: 6px; }
+    .job h3 { font-size: 24px; font-weight: 600; }
+    .job .role { color: var(--accent); font-size: 15px; margin: 2px 0 14px; }
+    .job ul { list-style: none; color: var(--muted); }
+    .job li { position: relative; padding-left: 20px; margin-bottom: 6px; }
+    .job li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px; height: 1px; background: var(--accent); }
+
+    /* About */
+    .about { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .box { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; }
+    .box h3 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 14px; }
+    .box ul { list-style: none; }
+    .box li { margin-bottom: 4px; }
+    .box small { color: var(--muted); }
+    .box p { color: var(--muted); font-size: 15px; }
+
+    /* Contact */
+    .contact { padding: 120px 0; text-align: center; }
+    .contact h2 { font-size: clamp(44px, 8vw, 104px); margin-bottom: 24px; }
+    .contact h2 em { color: var(--accent); }
+    .contact .cta { justify-content: center; }
+    footer { border-top: 1px solid var(--line); padding: 28px 0; font-size: 14px; color: var(--muted); }
+    footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+    /* Player */
+    dialog {
+      border: 0; padding: 0; background: transparent;
+      width: min(1100px, 94vw); max-width: none; margin: auto;
+    }
+    dialog::backdrop { background: rgba(0, 0, 0, .88); }
+    .player { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; }
+    .player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .close {
+      position: absolute; top: -48px; right: 0; background: none; border: 0; color: #fff;
+      font: inherit; font-size: 15px; cursor: pointer; padding: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .hero .wrap { grid-template-columns: 1fr; gap: 48px; }
+      .portrait { max-width: 360px; }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .about { grid-template-columns: repeat(2, 1fr); }
+      .stats .wrap { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(3) { border-left: 0; padding-left: 0; }
+      .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+    }
+    @media (max-width: 640px) {
+      body { font-size: 16px; }
+      .wrap { padding: 0 16px; }
+      nav ul { gap: 16px; font-size: 14px; }
+      nav ul li:nth-child(2), nav ul li:nth-child(3) { display: none; }
+      .logo { font-size: 15px; white-space: nowrap; }
+      .hero { padding: 56px 0 56px; }
+      .grid, .about { grid-template-columns: 1fr; }
+      .job { grid-template-columns: 1fr; gap: 6px; }
+      .stat { padding: 24px 12px; }
+      .stat b { font-size: 40px; }
+      section { padding-top: 72px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#top">Ahmet Anıl Demirhan<span>.</span></a>
+    <ul>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <div class="rec">Senior Video Editor · Istanbul</div>
+      <h1 class="serif">Stories that <em>hold</em> attention. Ads that <em>convert</em>.</h1>
+      <p class="lead">
+        8+ years cutting video for digital publishers and D2C brands — from high-volume
+        Meta &amp; YouTube ad creatives to documentary-style storytelling and motion design
+        in After Effects.
+      </p>
+      <div class="cta">
+        <a class="btn primary" href="#work">Watch my work</a>
+        <a class="btn ghost" href="mailto:aanildemirhan@gmail.com">Get in touch</a>
+      </div>
+    </div>
+    <div class="portrait">
+      <img src="assets/ahmet.jpg" alt="Portrait of Ahmet Anıl Demirhan wearing headphones" width="640" height="792">
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="wrap">
+    <div class="stat"><b>8+</b><span>years editing video</span></div>
+    <div class="stat"><b>200M+</b><span>total views delivered</span></div>
+    <div class="stat"><b>18M+</b><span>subscribers reached at Interesting Engineering</span></div>
+    <div class="stat"><b>50+</b><span>ad creatives per month for Meta &amp; YouTube</span></div>
+  </div>
+</div>
+
+<section id="work">
+  <div class="wrap">
+    <div class="eyebrow">Selected work</div>
+    <h2 class="serif">Things I've cut.</h2>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-filter="all">All</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="ie">Interesting Engineering</button>
+      <button class="tab" role="tab" aria-selected="false" data-filter="tr">Interviews · Milliyet &amp; Posta</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="more"><button class="btn ghost" id="showMore" type="button">Show more</button></div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="wrap">
+    <div class="eyebrow">Experience</div>
+    <h2 class="serif">Where I've worked.</h2>
+    <div class="jobs">
+      <div class="job">
+        <div class="when">Apr 2023 — Feb 2026</div>
+        <div>
+          <h3>Kendago</h3>
+          <div class="role">Senior Video Editor · D2C Marketing Agency</div>
+          <ul>
+            <li>Produced 50+ direct-response ad creatives per month for Meta and YouTube funnels (VShred, HBI, Svelte), supporting campaigns responsible for millions in paid ad spend.</li>
+            <li>Collaborated with PPC managers and creative leads to develop and implement video concepts.</li>
+            <li>Ran structured testing: A/B variations, angle, hook, core offer and CTA tests, plus CTV adaptations.</li>
+            <li>Analyzed CPA, ROAS and conversion rates to guide creative iterations.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="job">
+        <div class="when">Mar 2022 — Mar 2023</div>
+        <div>
+          <h3>Sheesha Finance &amp; Cointelegraph</h3>
+          <div class="role">Video Animator / Editor · Contract</div>
+          <ul>
+            <li>Produced motion-driven promotional videos and marketing content for Web3 and crypto brands.</li>
+            <li>Created short-form promos combining motion graphics, voiceover, 3D elements and music.</li>
+            <li>Built adaptable video templates for multi-platform social campaigns.</li>
+            <li>Worked with fully remote international teams (50+ members) on tight schedules.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="job">
+        <div class="when">Apr 2021 — Mar 2022</div>
+        <div>
+          <h3>Interesting Engineering</h3>
+          <div class="role">Senior Video Editor</div>
+          <ul>
+            <li>Produced videos for Interesting Engineering and its brands, reaching 18M+ subscribers across social platforms.</li>
+            <li>Edited mini-documentary style content with cross-disciplinary teams.</li>
+            <li>Delivered high-quality videos under tight deadlines, contributing to 200M+ total views.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="job">
+        <div class="when">Jul 2018 — Apr 2021</div>
+        <div>
+          <h3>Milliyet.com.tr &amp; Posta.com.tr</h3>
+          <div class="role">Videographer</div>
+          <ul>
+            <li>Produced daily video content for digital media brands reaching 60–100M+ monthly users.</li>
+            <li>Managed end-to-end production: planning, editing, publishing and scheduling.</li>
+            <li>Developed content for web and YouTube channels — Molatik, PembeNar, Milliyet Teknoloji, Posta TV.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap">
+    <div class="eyebrow">Toolkit &amp; background</div>
+    <h2 class="serif">The rest of the story.</h2>
+    <div class="about">
+      <div class="box">
+        <h3>Tools</h3>
+        <ul>
+          <li>Adobe Creative Suite</li>
+          <li>After Effects</li>
+          <li>Blender</li>
+          <li>Cinema 4D</li>
+          <li>Animation Composer</li>
+          <li>Envato Elements</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Languages</h3>
+        <ul>
+          <li>English <small>· Professional</small></li>
+          <li>Turkish <small>· Native</small></li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Education</h3>
+        <ul>
+          <li>BA in Linguistics</li>
+          <li><small>Istanbul University · 2018</small></li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Volunteering</h3>
+        <p><b style="color:var(--text);font-weight:500">Dreams Academy — AYDER.</b> Five months of leadership and social media work alongside people with every kind of disability.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div class="eyebrow">Contact</div>
+    <h2 class="serif">Have a project? <em>Let's talk.</em></h2>
+    <div class="cta">
+      <a class="btn primary" href="mailto:aanildemirhan@gmail.com">aanildemirhan@gmail.com</a>
+      <a class="btn ghost" href="https://www.linkedin.com/in/ahmet-an%C4%B1l-demirhan/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="year">2026</span> Ahmet Anıl Demirhan</span>
+    <span>Istanbul, Turkey</span>
+  </div>
+</footer>
+
+<dialog id="player" aria-label="Video player">
+  <button class="close" id="close" type="button">Close ✕</button>
+  <div class="player" id="frame"></div>
+</dialog>
+
+<script>
+  const videos = [
+    // Interesting Engineering
+    ["SREbl7Mpw2g", "5 reasons why the world is running out of chips", "ie"],
+    ["1AxLJdeH6Vw", "What can you do with a Boston Dynamics robot?", "ie"],
+    ["g8Qav3vIv9s", "How are microchips made?", "ie"],
+    ["639mqmZEvkM", "Japan's engineering solutions for the next tsunami", "ie"],
+    ["JyOg4zWXwG0", "What would happen if humans disappeared", "ie"],
+    ["uuFpfnqOBZw", "What is the dark web?", "ie"],
+    ["PRX3PHOh_L8", "D3O: The life-saving protective goo", "ie"],
+    ["8IitiMvjiVg", "A look inside Australia's nuclear submarine deal", "ie"],
+    ["li1aG7mAaH0", "The ISS vs China's Tiangong: Which is better?", "ie"],
+    ["RPyEwAKFlPg", "Gas vs electric cars: which is really better?", "ie"],
+    ["3FhbtsVaRUA", "How technology is reshaping the future of wildfires", "ie"],
+    ["aKLNOt85PMI", "What happens when skyscrapers are struck by lightning?", "ie"],
+    ["p0qe3HSdEmI", "When and why do buildings collapse?", "ie"],
+    ["cEW2nnB6ja4", "High-speed trains that can cross continents", "ie"],
+    ["DtpckvIBrqo", "How engineers build different bridges", "ie"],
+    ["iiBiujnAurA", "9 generations of gaming consoles", "ie"],
+    ["FXk76rWYdEs", "9 water jet cutting machines", "ie"],
+    ["_rCXyNQDtgw", "8 technologies that stop nearly any vehicle", "ie"],
+    ["mxMRV8B6CfM", "Short circuits — when electricity goes wrong", "ie"],
+    ["iuMfdFCvChA", "Global shipping crisis: Amazon and others take on a DIY approach", "ie"],
+    ["YYXbylXx504", "How do we remove CO2 from the atmosphere?", "ie"],
+    ["1oQNVuNdZP4", "Why changing lanes doesn't get you there faster", "ie"],
+    ["P6hYnsx27eQ", "Why are roads made of asphalt?", "ie"],
+    ["R2DU9YNp7oA", "3D printing helps us build structures faster and cheaper", "ie"],
+    ["8SjxCHqVH1g", "5 ancient organisms resurrected by science", "ie"],
+    // Milliyet & Posta
+    ["vor7QpFE5-0", "Cem Yılmaz — Molatik Özel", "tr"],
+    ["8kMfD2rMlJk", "Hayko Cepkin — Molatik Özel", "tr"],
+    ["7GlaTLhXmWM", "Okan Bayülgen — Molatik Özel", "tr"],
+    ["NB662XW7Oj8", "İki Dakika — maNga", "tr"],
+    ["1YV63XYlgbk", "Çetin Çetintaş: Bir Yoginin Hikayesi", "tr"]
+  ];
+  const labels = { ie: "Interesting Engineering", tr: "Milliyet · Molatik" };
+  // Show a mixed selection first so the "All" view isn't only one client.
+  const featured = ["SREbl7Mpw2g", "vor7QpFE5-0", "1AxLJdeH6Vw", "8kMfD2rMlJk", "g8Qav3vIv9s", "7GlaTLhXmWM"];
+  const STEP = 9;
+
+  const grid = document.getElementById("grid");
+  const showMore = document.getElementById("showMore");
+  let filter = "all";
+  let limit = STEP;
+
+  function list() {
+    if (filter !== "all") return videos.filter(v => v[2] === filter);
+    const first = featured.map(id => videos.find(v => v[0] === id));
+    return first.concat(videos.filter(v => !featured.includes(v[0])));
+  }
+
+  function render() {
+    const items = list();
+    grid.innerHTML = items.slice(0, limit).map(([id, title, cat]) => `
+      <button class="card" type="button" data-id="${id}">
+        <div class="thumb"><img loading="lazy" src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" onerror="this.style.visibility='hidden'"></div>
+        <h3>${title}</h3>
+        <p>${labels[cat]}</p>
+      </button>`).join("");
+    showMore.parentElement.hidden = items.length <= limit;
+  }
+
+  document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t === tab));
+    filter = tab.dataset.filter;
+    limit = STEP;
+    render();
+  }));
+  showMore.addEventListener("click", () => { limit += STEP; render(); });
+
+  const dialog = document.getElementById("player");
+  const frame = document.getElementById("frame");
+  grid.addEventListener("click", e => {
+    const card = e.target.closest(".card");
+    if (!card) return;
+    frame.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${card.dataset.id}?autoplay=1&rel=0"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe>`;
+    dialog.showModal();
+  });
+  document.getElementById("close").addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", e => { if (e.target === dialog) dialog.close(); });
+  dialog.addEventListener("close", () => { frame.innerHTML = ""; });
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+  render();
+</script>
+</body>
+</html>
