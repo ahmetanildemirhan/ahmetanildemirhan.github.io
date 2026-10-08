@@ -297,6 +297,7 @@
           <ul>
             <li data-i18n="jk.b1">Edited short-form social content for Kafa TV shows including Program Bitti, Hacivat &amp; Karagöz and Hangi Yüzle Gidiyosun!</li>
             <li data-i18n="jk.b2">Delivered vertical cuts for Reels and Shorts alongside horizontal versions for YouTube.</li>
+            <li data-i18n="jk.b3">Edited brand-partnership pitch videos for advertisers including Sprite, ETS, Alarko and Yataş.</li>
           </ul>
         </div>
       </div>
@@ -521,6 +522,7 @@
     "jk.role": "Video Editörü · Freelance",
     "jk.b1": "Program Bitti, Hacivat & Karagöz ve Hangi Yüzle Gidiyosun! gibi Kafa TV programları için kısa formatlı sosyal medya içerikleri kurguladım.",
     "jk.b2": "Reels ve Shorts için dikey kurguları, YouTube için yatay versiyonlarla birlikte teslim ettim.",
+    "jk.b3": "Sprite, ETS, Alarko ve Yataş gibi reklam verenler için marka iş birliği pitch videoları kurguladım.",
     "j3.when": "Mar 2022 — Mar 2023",
     "j3.role": "Video Animatör / Editör · Sözleşmeli",
     "j3.b1": "Web3 ve kripto markaları için motion odaklı tanıtım videoları ve pazarlama içerikleri ürettim.",
@@ -627,6 +629,10 @@
     ["gd", "10JI-goMLGo03bogpzlITaFsRfMM17Gvk", "Ready To Be Me Again — AI-animated music ad", "ai", true],
     // Kafa TV
     ["gd", "1yciF6xmdqFjppKJGz578z_I7ERbWBUfT", "Zeyto da Zeyto — Hacivat & Karagöz", "kafahd"],
+    ["gd", "1gNKyy3jZijWx_fyV9tHritYF5r7ecpQZ", "Sprite — brand partnership pitch", "kafapitch"],
+    ["gd", "1JRPzDMxZtrtqbPtH8Jqz4GdqqnMcl9Zk", "ETS — brand partnership pitch", "kafapitch"],
+    ["gd", "1fm_e-jOPUrAzsyWmI8CWxlWey8qvqiAO", "Alarko — brand partnership pitch", "kafapitch"],
+    ["gd", "1iBKMRVFp1AGMv8iXTAKTVhsLSTJ1DAjg", "Yataş — brand partnership pitch", "kafapitch"],
     ["gd", "1_FPI7-QpWFvDa7U7wb9WmdYr5gT6HGBs", "Cehaleti kestim — Program Bitti", "kafa", true],
     ["gd", "1MLvWDCmmS3J2NzE1m1SDoZ_6nlY8eTvk", "Hangi Yüzle Gidiyosun!", "kafa", true],
     ["gd", "1rQUHY1yNof6iMx524ho5sDjfJTb9ybpZ", "Can Yılmaz — Para", "kafa", true],
@@ -664,12 +670,12 @@
 
   const UI = {
     en: {
-      labels: { ads: "Performance Ads · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion & Promo", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels", kafahd: "Kafa TV" },
+      labels: { ads: "Performance Ads · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion & Promo", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels", kafahd: "Kafa TV", kafapitch: "Kafa TV · Brand pitch" },
       sending: "Sending…", sent: "Thanks — your message is on its way. I'll get back to you soon.",
       failed: "Something went wrong. Please email me directly at aanildemirhan@gmail.com."
     },
     tr: {
-      labels: { ads: "Performans Reklamları · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion ve Tanıtım", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels", kafahd: "Kafa TV" },
+      labels: { ads: "Performans Reklamları · Kendago", ai: "AI Video", ie: "Interesting Engineering", motion: "Motion ve Tanıtım", tr: "Milliyet · Molatik", social: "Sheesha Finance · TikTok", kafa: "Kafa TV · Reels", kafahd: "Kafa TV", kafapitch: "Kafa TV · Brand pitch" },
       sending: "Gönderiliyor…", sent: "Teşekkürler, mesajınız ulaştı. En kısa sürede dönüş yapacağım.",
       failed: "Bir sorun oluştu. Lütfen doğrudan aanildemirhan@gmail.com adresine yazın."
     }
@@ -695,8 +701,10 @@
 
   function list() {
     const horizontal = videos.filter(v => !isVertical(v));
-    // The Motion & Promo tab also lists Kafa TV's horizontal pieces.
-    const inTab = v => v[3] === filter || (filter === "motion" && v[3] === "kafahd");
+    // Kafa TV's horizontal pieces also appear under Motion & Promo, its pitches under Performance Ads.
+    const inTab = v => v[3] === filter
+      || (filter === "motion" && v[3] === "kafahd")
+      || (filter === "ads" && v[3] === "kafapitch");
     if (filter !== "all") return horizontal.filter(inTab);
     const first = featured.map(id => horizontal.find(v => v[1] === id)).filter(Boolean);
     return first.concat(horizontal.filter(v => !featured.includes(v[1])));
