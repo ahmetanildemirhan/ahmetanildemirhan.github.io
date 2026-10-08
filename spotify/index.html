@@ -35,12 +35,13 @@
         <button class="btn" id="demo">Örnek veriyle dene</button>
       </div>
       <input type="file" id="file" accept=".zip,.json,application/zip,application/json" multiple hidden>
+      <label class="remember"><input type="checkbox" id="remember" checked> Bu cihazda hatırla: bir dahaki sefere dosya yüklemeden açılsın</label>
       <div class="status" id="status" role="status"></div>
     </div>
 
     <p class="privacy">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-      <span>Verin bu cihazdan çıkmaz. Dosya tarayıcında açılır ve burada hesaplanır; hiçbir sunucuya yüklenmez, hiçbir yere kaydedilmez. Sayfayı kapattığında her şey silinir.</span>
+      <span>Verin bu cihazdan çıkmaz. Dosya tarayıcında açılır ve burada hesaplanır; hiçbir sunucuya yüklenmez. "Bu cihazda hatırla" seçiliyse yalnızca bu tarayıcıda saklanır ve istediğin an silebilirsin.</span>
     </p>
 
     <details class="howto">
@@ -65,6 +66,33 @@
         <p class="sub" id="bigSub"></p>
         <div class="stats" id="stats"></div>
         <div class="first-song" id="firstSong"></div>
+      </section>
+
+      <section class="block" id="explore">
+        <p class="eyebrow">Ara ve keşfet</p>
+        <h2 class="display">Geçmişinin içinde ara.</h2>
+        <p class="intro-text">Bir şarkı ya da sanatçı yaz, istersen tarih aralığı seç. Listelerdeki bir isme dokunarak da arayabilirsin.</p>
+        <div class="x-box">
+          <div class="x-filters">
+            <input type="search" id="xq" placeholder="Şarkı ya da sanatçı ara…" aria-label="Şarkı ya da sanatçı ara" autocomplete="off">
+            <label>Başlangıç <input type="date" id="xFrom"></label>
+            <label>Bitiş <input type="date" id="xTo"></label>
+          </div>
+          <div class="x-chips">
+            <button type="button" class="chip" id="xToday">Geçmiş yıllarda bugün</button>
+            <label class="chip check"><input type="checkbox" id="xShort"> 30 saniyeden kısa çalmaları da göster</label>
+            <button type="button" class="chip ghost" id="xClear">Temizle</button>
+          </div>
+          <div class="x-stats" id="xStats"></div>
+          <div class="x-chart" id="xChart"></div>
+          <div class="x-tops">
+            <div><h3>Sanatçılar</h3><ol class="rank" id="xArtists"></ol></div>
+            <div><h3>Şarkılar</h3><ol class="rank" id="xTracks"></ol></div>
+          </div>
+          <h3>Dinlemeler</h3>
+          <ol class="x-plays" id="xPlays"></ol>
+          <button type="button" class="btn" id="xMore">Daha fazla göster</button>
+        </div>
       </section>
 
       <section class="block" id="race">

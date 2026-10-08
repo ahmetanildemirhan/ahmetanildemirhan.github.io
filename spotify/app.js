@@ -33,6 +33,7 @@
   function hours(ms) { return ms / HOUR; }
   function fmtHours(ms) {
     var h = hours(ms);
+    if (h < 1) return nf.format(Math.round(ms / 60000)) + " dk";
     return (h >= 10 ? nf.format(Math.round(h)) : nf1.format(h)) + " saat";
   }
   function fmtDate(t) {
@@ -340,7 +341,7 @@
   function rankList(items, opts) {
     var max = items.length ? opts.value(items[0]) : 1;
     return items.map(function (it, i) {
-      return '<li class="' + (i === 0 ? "top" : "") + '"><span class="n">' + (i + 1) + '</span>' +
+      return '<li class="' + (i === 0 ? "top" : "") + '" data-q="' + esc(opts.q(it)) + '"><span class="n">' + (i + 1) + '</span>' +
         '<span class="t" title="' + esc(opts.title(it)) + '">' + opts.label(it) + '</span>' +
         '<span class="m">' + opts.meta(it) + '</span>' +
         (opts.meter ? '<span class="n"></span><span class="meter"><i style="width:' + (opts.value(it) / max * 100).toFixed(1) + '%"></i></span>' : "") +
@@ -349,12 +350,14 @@
   }
   var artistOpts = {
     value: function (a) { return a.ms; }, title: function (a) { return a.name; },
-    label: function (a) { return esc(a.name); }, meta: function (a) { return fmtHours(a.ms); }, meter: true
+    label: function (a) { return esc(a.name); }, meta: function (a) { return fmtHours(a.ms); }, meter: true,
+    q: function (a) { return a.name; }
   };
   var trackOpts = {
     value: function (t) { return t.plays; }, title: function (t) { return t.track + " — " + t.artist; },
     label: function (t) { return esc(t.track) + ' <span>· ' + esc(t.artist) + '</span>'; },
-    meta: function (t) { return nf.format(t.plays) + " kez"; }, meter: false
+    meta: function (t) { return nf.format(t.plays) + " kez"; }, meter: false,
+    q: function (t) { return t.track; }
   };
 
   function render(A, kind, isDemo) {
@@ -741,6 +744,244 @@
     };
   })();
 
+  /* ---------- Search & explore ---------- */
+
+  // Every music play in compact columns: times (seconds), durations and an
+  // index into a track list. 13 years fit in a few megabytes this way.
+  function encodePlays(records) {
+    var music = records.filter(function (r) { return !r.pod; });
+    var artistIdx = new Map(), trackIdx = new Map(), artists = [], tracks = [];
+    var n = music.length, t = new Uint32Array(n), ms = new Uint32Array(n), tr = new Uint32Array(n);
+    music.forEach(function (r, i) {
+      var a = artistIdx.get(r.artist);
+      if (a === undefined) { a = artists.length; artists.push(r.artist); artistIdx.set(r.artist, a); }
+      var key = r.track + "\u0001" + r.artist, k = trackIdx.get(key);
+      if (k === undefined) { k = tracks.length; tracks.push([r.track, a]); trackIdx.set(key, k); }
+      t[i] = Math.floor(r.t / 1000); ms[i] = Math.min(r.ms, 4294967295); tr[i] = k;
+    });
+    return { artists: artists, tracks: tracks, t: t, ms: ms, tr: tr };
+  }
+
+  // Saved on this device only (IndexedDB), so the page can reopen without a file.
+  var store = (function () {
+    function open() {
+      return new Promise(function (res, rej) {
+        var req = indexedDB.open("spotify-zaman-makinesi", 1);
+        req.onupgradeneeded = function () { req.result.createObjectStore("saved"); };
+        req.onsuccess = function () { res(req.result); };
+        req.onerror = function () { rej(req.error); };
+      });
+    }
+    function run(mode, fn) {
+      return open().then(function (db) {
+        return new Promise(function (res, rej) {
+          var tx = db.transaction("saved", mode), req = fn(tx.objectStore("saved"));
+          tx.oncomplete = function () { db.close(); res(req && req.result); };
+          tx.onerror = tx.onabort = function () { db.close(); rej(tx.error); };
+        });
+      });
+    }
+    return {
+      get: function () { return run("readonly", function (st) { return st.get("me"); }); },
+      put: function (v) { return run("readwrite", function (st) { return st.put(v, "me"); }); },
+      clear: function () { return run("readwrite", function (st) { return st.delete("me"); }); }
+    };
+  })();
+
+  var explorer = (function () {
+    var box = $("explore");
+    if (!box) return { load: function () {}, search: function () {} };
+    var P = null, fold = null, md = null, today = false, shown = 0, hits = null;
+    var PAGE = 25;
+
+    function norm(x) {
+      return String(x).toLocaleLowerCase("tr").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ı/g, "i");
+    }
+
+    function load(plays) {
+      P = plays;
+      fold = P.tracks.map(function (tk) { return norm(tk[0] + " \u0001 " + P.artists[tk[1]]); });
+      md = null;
+      document.body.classList.add("can-search");
+      clear();
+    }
+
+    function dayStart(v) { if (!v) return null; var p = v.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]).getTime() / 1000; }
+
+    function run() {
+      if (!P) return;
+      var q = norm($("xq").value.trim());
+      var from = dayStart($("xFrom").value), to = dayStart($("xTo").value);
+      if (to !== null) to += 86400 - 1;
+      var showShort = $("xShort").checked;
+      var match = null;
+      if (q) {
+        match = new Uint8Array(P.tracks.length);
+        for (var k = 0; k < fold.length; k++) if (fold[k].indexOf(q) >= 0) match[k] = 1;
+      }
+      var todayMD = 0;
+      if (today) {
+        var now = new Date();
+        todayMD = (now.getMonth() + 1) * 100 + now.getDate();
+        if (!md) {
+          md = new Uint16Array(P.t.length);
+          for (var j = 0; j < P.t.length; j++) { var d = new Date(P.t[j] * 1000); md[j] = (d.getMonth() + 1) * 100 + d.getDate(); }
+        }
+      }
+      var out = [];
+      for (var i = 0; i < P.t.length; i++) {
+        if (!showShort && P.ms[i] < MIN_PLAY) continue;
+        if (match && !match[P.tr[i]]) continue;
+        if (from !== null && P.t[i] < from) continue;
+        if (to !== null && P.t[i] > to) continue;
+        if (today && md[i] !== todayMD) continue;
+        out.push(i);
+      }
+      hits = out;
+      renderResults();
+    }
+
+    function renderResults() {
+      var n = hits.length;
+      if (!n) {
+        $("xStats").innerHTML = '<p class="x-empty">Bu filtreyle eşleşen bir dinleme yok.</p>';
+        ["xChart", "xArtists", "xTracks", "xPlays"].forEach(function (id) { $(id).innerHTML = ""; });
+        $("xMore").classList.add("hidden");
+        return;
+      }
+      var totalMs = 0, plays = 0, trMs = new Float64Array(P.tracks.length), trPlays = new Uint32Array(P.tracks.length);
+      var arMs = new Float64Array(P.artists.length);
+      hits.forEach(function (i) {
+        var k = P.tr[i];
+        totalMs += P.ms[i]; trMs[k] += P.ms[i]; arMs[P.tracks[k][1]] += P.ms[i];
+        if (P.ms[i] >= MIN_PLAY) { plays++; trPlays[k]++; }
+      });
+      var nTracks = 0, nArtists = 0;
+      for (var a = 0; a < trMs.length; a++) if (trMs[a] > 0 || trPlays[a] > 0) nTracks++;
+      for (var b = 0; b < arMs.length; b++) if (arMs[b] > 0) nArtists++;
+      var first = P.t[hits[0]] * 1000, last = P.t[hits[n - 1]] * 1000;
+      var stats = [
+        ["Dinleme", nf.format(plays), "30 saniyeyi geçen çalmalar"],
+        ["Toplam süre", fmtHours(totalMs), ""],
+        ["İlk kez", fmtDate(first), ""],
+        ["Son kez", fmtDate(last), ""],
+        ["Farklı şarkı", nf.format(nTracks), ""],
+        ["Farklı sanatçı", nf.format(nArtists), ""]
+      ];
+      $("xStats").innerHTML = stats.map(function (st) {
+        return '<div class="stat"><div class="k">' + st[0] + '</div><div class="v sm">' + st[1] + '</div>' + (st[2] ? '<div class="d">' + st[2] + '</div>' : "") + '</div>';
+      }).join("");
+
+      renderChart(first, last);
+
+      var ta = [], tt = [];
+      for (var x = 0; x < arMs.length; x++) if (arMs[x] > 0) ta.push({ name: P.artists[x], ms: arMs[x] });
+      for (var y = 0; y < trMs.length; y++) if (trPlays[y] > 0) tt.push({ track: P.tracks[y][0], artist: P.artists[P.tracks[y][1]], plays: trPlays[y], ms: trMs[y] });
+      ta.sort(function (p, q) { return q.ms - p.ms; });
+      tt.sort(function (p, q) { return q.plays - p.plays || q.ms - p.ms; });
+      $("xArtists").innerHTML = rankList(ta.slice(0, 10), artistOpts);
+      $("xTracks").innerHTML = rankList(tt.slice(0, 10), trackOpts);
+
+      shown = 0;
+      $("xPlays").innerHTML = "";
+      more();
+    }
+
+    // Plays per day for short ranges, per month otherwise. Bars are clickable.
+    function renderChart(first, last) {
+      var a = new Date(first), b = new Date(last);
+      var byDay = (last - first) / 864e5 <= 92;
+      var bins = [], start;
+      if (byDay) {
+        start = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+        var days = Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate()) - start) / 864e5) + 1;
+        for (var d = 0; d < days; d++) bins.push(0);
+      } else {
+        var months = (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth() + 1;
+        for (var m = 0; m < months; m++) bins.push(0);
+      }
+      hits.forEach(function (i) {
+        var dt = new Date(P.t[i] * 1000), idx;
+        if (byDay) idx = Math.round((new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()) - start) / 864e5);
+        else idx = (dt.getFullYear() - a.getFullYear()) * 12 + dt.getMonth() - a.getMonth();
+        bins[idx] += P.ms[i];
+      });
+      var max = Math.max.apply(null, bins) || 1;
+      function binDate(k) {
+        return byDay ? new Date(start.getFullYear(), start.getMonth(), start.getDate() + k) : new Date(a.getFullYear(), a.getMonth() + k, 1);
+      }
+      function label(k) {
+        var dt = binDate(k);
+        return byDay ? dt.getDate() + " " + MONTHS[dt.getMonth()] + " " + dt.getFullYear() : MONTHS[dt.getMonth()] + " " + dt.getFullYear();
+      }
+      $("xChart").innerHTML = bins.map(function (v, k) {
+        return '<button type="button" data-bin="' + k + '" title="' + label(k) + ' · ' + fmtHours(v) + '"><i style="height:' + (v ? Math.max(2, v / max * 100) : 0).toFixed(1) + '%"></i></button>';
+      }).join("") + '<span class="ax">' + label(0) + '</span><span class="ax r">' + label(bins.length - 1) + '</span>';
+      $("xChart").onclick = function (e) {
+        var btn = e.target.closest("[data-bin]");
+        if (!btn) return;
+        var dt = binDate(+btn.dataset.bin);
+        var end = byDay ? dt : new Date(dt.getFullYear(), dt.getMonth() + 1, 0);
+        setToday(false);
+        $("xFrom").value = iso(dt); $("xTo").value = iso(end);
+        run();
+      };
+    }
+
+    function iso(d) {
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    function more() {
+      var html = "";
+      var end = Math.min(hits.length, shown + PAGE);
+      for (var j = shown; j < end; j++) {
+        var i = hits[hits.length - 1 - j]; // newest first
+        var d = new Date(P.t[i] * 1000), k = P.tr[i], dur = P.ms[i];
+        var when = d.getDate() + " " + MONTHS[d.getMonth()].slice(0, 3) + " " + d.getFullYear() + " · " +
+          String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+        var mm = Math.floor(dur / 60000), ss = Math.floor(dur / 1000) % 60;
+        html += '<li class="' + (dur < MIN_PLAY ? "short" : "") + '"><span class="when">' + when + '</span>' +
+          '<span class="what">' + esc(P.tracks[k][0]) + ' <span>— ' + esc(P.artists[P.tracks[k][1]]) + '</span></span>' +
+          '<span class="dur">' + mm + ":" + String(ss).padStart(2, "0") + '</span></li>';
+      }
+      $("xPlays").insertAdjacentHTML("beforeend", html);
+      shown = end;
+      $("xMore").classList.toggle("hidden", shown >= hits.length);
+      $("xMore").textContent = "Daha fazla göster (" + nf.format(hits.length - shown) + " kaldı)";
+    }
+
+    function setToday(on) {
+      today = on;
+      $("xToday").setAttribute("aria-pressed", on ? "true" : "false");
+      if (on) { $("xFrom").value = ""; $("xTo").value = ""; }
+    }
+
+    function clear() {
+      $("xq").value = ""; $("xFrom").value = ""; $("xTo").value = ""; $("xShort").checked = false;
+      setToday(false);
+      run();
+    }
+
+    var timer = 0;
+    $("xq").addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(run, 150); });
+    ["xFrom", "xTo"].forEach(function (id) { $(id).addEventListener("change", function () { setToday(false); run(); }); });
+    $("xShort").addEventListener("change", run);
+    $("xToday").addEventListener("click", function () { setToday(!today); run(); });
+    $("xClear").addEventListener("click", clear);
+    $("xMore").addEventListener("click", more);
+
+    return {
+      load: load,
+      search: function (q) {
+        if (!P) return;
+        $("xq").value = q;
+        run();
+        box.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
+  })();
+
   /* ---------- Wiring ---------- */
 
   var state = { S: null };
@@ -774,8 +1015,15 @@
       var parsed = parser.result();
       if (!parsed.records.length) throw new Error("Dosyalarda dinleme kaydı bulamadım.");
       var S = summarize(aggregate(parsed.records));
+      var plays = encodePlays(parsed.records);
       setStatus("");
       show(S, parsed.kind, false);
+      explorer.load(plays);
+      if ($("remember").checked) {
+        store.put({ summary: toJSON(S), plays: plays, kind: parsed.kind, savedAt: Date.now() })
+          .then(function () { savedBanner(Date.now()); })
+          .catch(function (err) { console.warn("Kaydedilemedi", err); });
+      }
     } catch (err) {
       console.error(err);
       setStatus(err.message || "Dosya okunamadı.", true);
@@ -808,12 +1056,40 @@
     $("file").addEventListener("change", function (e) { handleFiles(e.target.files); });
     $("demo").addEventListener("click", function () {
       setStatus("Örnek veri hazırlanıyor…");
-      setTimeout(function () { show(summarize(aggregate(demoRecords())), "extended", true); setStatus(""); }, 30);
+      setTimeout(function () {
+        var recs = demoRecords();
+        show(summarize(aggregate(recs)), "extended", true);
+        explorer.load(encodePlays(recs));
+        setStatus("");
+      }, 30);
     });
     $("reset").addEventListener("click", reset);
   }
+
+  function savedBanner(when) {
+    var banner = $("banner");
+    banner.className = "banner";
+    banner.innerHTML = '<span>Geçmişin bu cihazda kayıtlı (' + fmtDate(when) + '). Sayfayı bir dahaki açışında dosya yüklemeden görürsün.</span>' +
+      '<button type="button" id="forget">Bu cihazdan sil</button>';
+  }
+
+  // Reopen a history saved on this device.
+  if (drop && window.indexedDB) {
+    store.get().then(function (saved) {
+      if (!saved || state.S) return;
+      show(fromJSON(saved.summary), saved.kind, false);
+      explorer.load(saved.plays);
+      savedBanner(saved.savedAt);
+    }).catch(function () {});
+  }
   document.addEventListener("click", function (e) {
     if (e.target.closest("[data-reset]")) reset();
+    if (e.target.closest("#forget")) {
+      store.clear().then(reset, reset);
+      return;
+    }
+    var qItem = e.target.closest("[data-q]");
+    if (qItem && document.body.classList.contains("can-search")) explorer.search(qItem.dataset.q);
     var yb = e.target.closest("[data-year]");
     if (yb) $("y" + yb.dataset.year).scrollIntoView({ behavior: "smooth", block: "start", inline: "start" });
     var tab = e.target.closest("[data-tab]");
