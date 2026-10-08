@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spotify Zaman Makinesi</title>
+  <meta name="description" content="Spotify'daki bütün dinleme geçmişini yükle: yıllara göre özetin, dinleme saatlerin ve videoya dönüştürülebilen sanatçı yarışın. Verin cihazından çıkmaz.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0b0d0c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d0c;
+      --bg-2: #131615;
+      --bg-3: #1b1f1d;
+      --line: #262b29;
+      --text: #f1f2ee;
+      --muted: #949a95;
+      --accent: #1ed760;
+      --accent-ink: #06210f;
+      --warm: #ff4d2e;
+      --radius: 14px;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Geist, system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    button, select, input { font: inherit; color: inherit; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+    .display { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; letter-spacing: -.035em; line-height: 1.02; }
+    .muted { color: var(--muted); }
+    .hidden { display: none !important; }
+
+    header.top { border-bottom: 1px solid var(--line); }
+    header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 60px; }
+    .logo { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; text-decoration: none; font-size: 18px; letter-spacing: -.01em; white-space: nowrap; }
+    .logo span { color: var(--accent); }
+    .top-link { font-size: 14px; color: var(--muted); text-decoration: none; }
+    .top-link:hover { color: var(--text); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 22px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--bg-2); cursor: pointer; font-weight: 500; font-size: 15px;
+      text-decoration: none; transition: border-color .2s, background .2s;
+    }
+    .btn:hover { border-color: var(--muted); }
+    .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+    .btn.primary:hover { background: #3be476; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* Upload screen */
+    .intro { padding: 72px 0 96px; }
+    .intro h1 { font-size: clamp(44px, 8vw, 92px); max-width: 12ch; }
+    .intro h1 em { font-style: normal; color: var(--accent); }
+    .intro .lead { font-size: 19px; color: var(--muted); max-width: 46ch; margin-top: 20px; }
+    .drop {
+      margin-top: 40px; border: 1.5px dashed var(--line); border-radius: 22px;
+      padding: 44px 24px; text-align: center; background: var(--bg-2);
+      transition: border-color .2s, background .2s;
+    }
+    .drop.over { border-color: var(--accent); background: #10201a; }
+    .drop h2 { font-size: 26px; }
+    .drop p { color: var(--muted); margin-top: 6px; }
+    .drop .actions { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .status { margin-top: 18px; min-height: 1.6em; font-size: 15px; }
+    .status.error { color: var(--warm); }
+    .privacy { display: flex; gap: 10px; align-items: flex-start; margin-top: 20px; font-size: 14px; color: var(--muted); max-width: 64ch; }
+    .privacy svg { flex: none; margin-top: 3px; color: var(--accent); }
+
+    details.howto { margin-top: 32px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-2); }
+    details.howto summary { cursor: pointer; padding: 18px 22px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    details.howto summary::-webkit-details-marker { display: none; }
+    details.howto summary::after { content: "+"; color: var(--muted); font-weight: 400; }
+    details.howto[open] summary::after { content: "–"; }
+    details.howto ol { padding: 0 22px 22px 44px; color: var(--muted); }
+    details.howto li { margin-top: 8px; }
+    details.howto strong { color: var(--text); font-weight: 600; }
+
+    /* Results */
+    .banner {
+      margin-top: 24px; padding: 12px 18px; border-radius: 12px; font-size: 15px;
+      background: #10201a; border: 1px solid #1d3a2b; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    }
+    .banner.warn { background: #24130f; border-color: #4a2219; }
+    .banner button { background: none; border: none; color: var(--accent); cursor: pointer; font-weight: 600; padding: 0; }
+    section.block { padding: 72px 0 0; }
+    section.block:last-of-type { padding-bottom: 96px; }
+    .eyebrow { font-size: 13px; text-transform: uppercase; letter-spacing: .14em; color: var(--accent); font-weight: 600; }
+    section.block h2 { font-size: clamp(32px, 5vw, 52px); margin-top: 10px; }
+    section.block .intro-text { color: var(--muted); margin-top: 10px; max-width: 60ch; }
+
+    .hero-res { padding-top: 56px; }
+    .hero-res .since { color: var(--muted); font-size: 18px; }
+    .hero-res .big { font-size: clamp(64px, 14vw, 168px); color: var(--accent); margin-top: 6px; }
+    .hero-res .big small { font-size: .32em; color: var(--text); letter-spacing: -.02em; margin-left: .2em; }
+    .hero-res .sub { font-size: 20px; margin-top: 10px; max-width: 40ch; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin-top: 40px; }
+    .stat { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; min-width: 0; }
+    .stat .k { font-size: 13px; color: var(--muted); }
+    .stat .v { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -.03em; margin-top: 2px; overflow-wrap: anywhere; line-height: 1.15; }
+    .stat .v.sm { font-size: 20px; }
+    .stat .d { font-size: 14px; color: var(--muted); margin-top: 4px; overflow-wrap: anywhere; }
+    .first-song { margin-top: 12px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
+    .first-song .k { font-size: 13px; color: var(--muted); }
+    .first-song .v { font-size: 19px; font-weight: 600; margin-top: 2px; overflow-wrap: anywhere; }
+
+    .year-bars { display: flex; align-items: flex-end; gap: 6px; height: 200px; margin-top: 32px; padding-bottom: 26px; position: relative; }
+    .year-bars button {
+      flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+      background: none; border: none; cursor: pointer; position: relative; padding: 0;
+    }
+    .year-bars .bar { width: 100%; background: var(--bg-3); border-radius: 6px 6px 2px 2px; transition: background .2s; }
+    .year-bars button:hover .bar, .year-bars button.peak .bar { background: var(--accent); }
+    .year-bars .lbl { position: absolute; bottom: -24px; font-size: 12px; color: var(--muted); }
+    .year-bars .val { font-size: 11px; color: var(--muted); margin-bottom: 4px; white-space: nowrap; }
+
+    .years { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 40px; }
+    .year { background: var(--bg-2); border: 1px solid var(--line); border-radius: 18px; padding: 22px; min-width: 0; scroll-margin-top: 20px; }
+    .year .yh { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .year .yn { font-size: 40px; }
+    .year .yt { color: var(--muted); font-size: 14px; text-align: right; }
+    .year h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 600; margin-top: 18px; }
+    .rank { list-style: none; margin-top: 8px; }
+    .rank li { display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; font-size: 15px; padding: 5px 0; min-width: 0; }
+    .rank .n { color: var(--muted); font-size: 13px; text-align: right; }
+    .rank .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rank .t span { color: var(--muted); }
+    .rank .m { color: var(--muted); font-size: 13px; white-space: nowrap; }
+    .rank .meter { grid-column: 2 / 4; height: 3px; background: var(--bg-3); border-radius: 2px; margin-top: -2px; overflow: hidden; }
+    .rank .meter i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+    .rank li.top .t { font-weight: 600; }
+
+    .tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--line); margin-top: 28px; }
+    .tabs button { border: none; background: none; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-size: 14px; color: var(--muted); }
+    .tabs button[aria-selected="true"] { background: var(--text); color: var(--bg); font-weight: 600; }
+    .alltime { margin-top: 20px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 18px; padding: 10px 22px 18px; }
+    .alltime .rank li { font-size: 16px; padding: 7px 0; }
+
+    .heat-wrap { margin-top: 32px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+    .heat { display: grid; grid-template-columns: 34px repeat(24, 1fr); gap: 3px; }
+    .heat .c { aspect-ratio: 1; border-radius: 3px; background: var(--accent); min-width: 0; }
+    .heat .dl { font-size: 12px; color: var(--muted); align-self: center; }
+    .heat .hl { font-size: 11px; color: var(--muted); text-align: center; }
+    .heat-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+
+    .race-box { margin-top: 32px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 18px; padding: 18px; }
+    .race-stage { display: flex; justify-content: center; background: #060807; border-radius: 12px; overflow: hidden; }
+    .race-stage canvas { display: block; max-width: 100%; max-height: 72vh; width: auto; height: auto; }
+    .race-controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-top: 16px; }
+    .race-controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+    .race-controls select {
+      background: var(--bg-3); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: 14px; color: var(--text);
+    }
+    .race-controls .grow { flex: 1; }
+    .scrub { display: flex; gap: 12px; align-items: center; margin-top: 14px; }
+    .scrub input { flex: 1; accent-color: var(--accent); }
+    .scrub .when { font-size: 14px; color: var(--muted); min-width: 9ch; text-align: right; font-variant-numeric: tabular-nums; }
+    .rec-note { font-size: 14px; color: var(--muted); margin-top: 12px; }
+    .rec-note.on { color: var(--warm); }
+
+    footer { border-top: 1px solid var(--line); padding: 28px 0 40px; font-size: 14px; color: var(--muted); }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; }
+
+    @media (max-width: 600px) {
+      .wrap { padding: 0 16px; }
+      .intro { padding: 48px 0 64px; }
+      .drop { padding: 32px 18px; }
+      .years { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; margin: 32px -16px 0; padding: 0 16px 8px; scroll-padding: 0 16px; }
+      .year { flex: 0 0 86%; scroll-snap-align: start; }
+      .heat { grid-template-columns: 26px repeat(24, 1fr); gap: 2px; }
+      .heat .hl:nth-child(odd) { visibility: hidden; }
+      .race-box { padding: 10px; }
+      .year-bars .val { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="./">Spotify Zaman Makinesi<span>.</span></a>
+    <a class="top-link" href="../">ahmetanildemirhan</a>
+  </div>
+</header>
+
+<main>
+  <!-- Upload -->
+  <div id="upload" class="wrap intro">
+    <h1 class="display">Spotify'daki <em>bütün</em> geçmişin.</h1>
+    <p class="lead">İlk günden bugüne çaldığın her şarkı: yıl yıl özetin, hangi saatlerde dinlediğin ve videoya dönüştürebileceğin bir sanatçı yarışı.</p>
+
+    <div class="drop" id="drop">
+      <h2 class="display">Spotify'dan gelen dosyayı buraya bırak</h2>
+      <p>ZIP dosyasını olduğu gibi bırakabilirsin, açmana gerek yok.</p>
+      <div class="actions">
+        <button class="btn primary" id="pick">Dosya seç</button>
+        <button class="btn" id="demo">Örnek veriyle dene</button>
+      </div>
+      <input type="file" id="file" accept=".zip,.json,application/zip,application/json" multiple hidden>
+      <div class="status" id="status" role="status"></div>
+    </div>
+
+    <p class="privacy">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      <span>Verin bu cihazdan çıkmaz. Dosya tarayıcında açılır ve burada hesaplanır; hiçbir sunucuya yüklenmez, hiçbir yere kaydedilmez. Sayfayı kapattığında her şey silinir.</span>
+    </p>
+
+    <details class="howto">
+      <summary>Verimi Spotify'dan nasıl alırım?</summary>
+      <ol>
+        <li>Bilgisayardan <strong>spotify.com/account/privacy</strong> adresine gir ve giriş yap.</li>
+        <li>Aşağı in, <strong>"Extended streaming history"</strong> (Genişletilmiş dinleme geçmişi) kutusunu işaretle. "Account data" sadece son bir yılı verir.</li>
+        <li><strong>Request data</strong> butonuna bas ve Spotify'ın gönderdiği onay e-postasındaki linke tıkla.</li>
+        <li>Birkaç gün içinde (en geç 30 gün) indirme linki e-postayla gelir. İndirdiğin <strong>my_spotify_data.zip</strong> dosyasını buraya bırak.</li>
+      </ol>
+    </details>
+  </div>
+
+  <!-- Results -->
+  <div id="results" class="hidden">
+    <div class="wrap">
+      <div class="banner hidden" id="banner"></div>
+
+      <section class="hero-res">
+        <p class="since" id="since"></p>
+        <p class="big display" id="bigHours"></p>
+        <p class="sub" id="bigSub"></p>
+        <div class="stats" id="stats"></div>
+        <div class="first-song" id="firstSong"></div>
+      </section>
+
+      <section class="block" id="race">
+        <p class="eyebrow">Sanatçı yarışı</p>
+        <h2 class="display">Kim, ne zaman öne geçti?</h2>
+        <p class="intro-text">En çok dinlediğin sanatçılar ay ay yarışıyor. Formatı seç, oynat, beğenirsen video olarak indir.</p>
+        <div class="race-box">
+          <div class="race-stage"><canvas id="raceCanvas" width="1920" height="1080" aria-label="Sanatçı yarışı animasyonu"></canvas></div>
+          <div class="scrub">
+            <button class="btn primary" id="play" style="padding:10px 18px">Oynat</button>
+            <input type="range" id="scrub" min="0" max="1" step="0.01" value="0" aria-label="Zaman">
+            <span class="when" id="when"></span>
+          </div>
+          <div class="race-controls">
+            <label>Ölçü
+              <select id="mode">
+                <option value="total">Toplam (ilk günden beri)</option>
+                <option value="window">Son 12 ay</option>
+              </select>
+            </label>
+            <label>Format
+              <select id="ratio">
+                <option value="16:9">Yatay 16:9 (YouTube)</option>
+                <option value="9:16">Dikey 9:16 (Reels, TikTok)</option>
+                <option value="1:1">Kare 1:1</option>
+              </select>
+            </label>
+            <label>Hız
+              <select id="speed">
+                <option value="2.5">Yavaş</option>
+                <option value="4" selected>Normal</option>
+                <option value="7">Hızlı</option>
+              </select>
+            </label>
+            <span class="grow"></span>
+            <button class="btn" id="record">Video olarak indir</button>
+          </div>
+          <p class="rec-note" id="recNote"></p>
+        </div>
+      </section>
+
+      <section class="block" id="yearsSec">
+        <p class="eyebrow">Yıl yıl</p>
+        <h2 class="display">Her yılın kendi şarkısı var.</h2>
+        <p class="intro-text">Yıllara göre toplam dinleme süren. Bir yıla dokunursan o yılın özetine gidersin.</p>
+        <div class="year-bars" id="yearBars"></div>
+        <div class="years" id="years"></div>
+      </section>
+
+      <section class="block">
+        <p class="eyebrow">Tüm zamanlar</p>
+        <h2 class="display">Hiç eskimeyenler.</h2>
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="true" data-tab="artists">Sanatçılar</button>
+          <button role="tab" aria-selected="false" data-tab="tracks">Şarkılar</button>
+        </div>
+        <div class="alltime"><ol class="rank" id="allTime"></ol></div>
+      </section>
+
+      <section class="block">
+        <p class="eyebrow">Dinleme saatlerin</p>
+        <h2 class="display" id="clockTitle">Ne zaman dinliyorsun?</h2>
+        <p class="intro-text">Haftanın günü ve saate göre toplam dinleme. Renk ne kadar koyuysa o saatte o kadar çok dinlemişsin.</p>
+        <div class="heat-wrap">
+          <div class="heat" id="heat"></div>
+          <div class="heat-facts" id="heatFacts"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Verin yalnızca bu sekmede, senin cihazında işlenir.</span>
+    <button class="btn hidden" id="reset" style="padding:8px 16px">Başka bir dosya yükle</button>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var nf = new Intl.NumberFormat("tr-TR");
+  var nf1 = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 1 });
+  var MONTHS = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+  var DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+  var DAYS_LONG = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+  var HOUR = 3.6e6;
+  var MIN_PLAY = 30000; // Spotify counts a stream after 30 seconds.
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function hours(ms) { return ms / HOUR; }
+  function fmtHours(ms) {
+    var h = hours(ms);
+    return (h >= 10 ? nf.format(Math.round(h)) : nf1.format(h)) + " saat";
+  }
+  function fmtDate(t) {
+    var d = new Date(t);
+    return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear();
+  }
+
+  /* ---------- Reading files ---------- */
+
+  // Minimal ZIP reader: walks the central directory and inflates entries with
+  // the browser's built-in DecompressionStream, so no library is needed.
+  async function readZip(file) {
+    var buf = await file.arrayBuffer();
+    var dv = new DataView(buf);
+    var eocd = -1;
+    for (var i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65557); i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error("Bu dosya geçerli bir ZIP gibi görünmüyor.");
+    var count = dv.getUint16(eocd + 10, true);
+    var p = dv.getUint32(eocd + 16, true);
+    if (p === 0xffffffff) throw new Error("ZIP dosyası çok büyük. Açıp içindeki JSON dosyalarını bırakmayı dene.");
+    var dec = new TextDecoder();
+    var out = [];
+    for (var n = 0; n < count; n++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) break;
+      var method = dv.getUint16(p + 10, true);
+      var size = dv.getUint32(p + 20, true);
+      var nameLen = dv.getUint16(p + 28, true);
+      var extraLen = dv.getUint16(p + 30, true);
+      var commentLen = dv.getUint16(p + 32, true);
+      var local = dv.getUint32(p + 42, true);
+      var name = dec.decode(new Uint8Array(buf, p + 46, nameLen));
+      p += 46 + nameLen + extraLen + commentLen;
+      if (!isHistoryName(name)) continue;
+      var start = local + 30 + dv.getUint16(local + 26, true) + dv.getUint16(local + 28, true);
+      var data = new Uint8Array(buf, start, size);
+      var text;
+      if (method === 0) text = dec.decode(data);
+      else if (method === 8) {
+        var stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+        text = await new Response(stream).text();
+      } else continue;
+      out.push({ name: name, text: text });
+    }
+    return out;
+  }
+
+  function isHistoryName(name) {
+    var base = name.split("/").pop();
+    return /\.json$/i.test(base) && /stream(ing)?_?history/i.test(base);
+  }
+
+  async function readFiles(files) {
+    var texts = [];
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (/\.zip$/i.test(f.name) || f.type === "application/zip") {
+        setStatus(f.name + " açılıyor…");
+        texts = texts.concat(await readZip(f));
+      } else if (/\.json$/i.test(f.name)) {
+        texts.push({ name: f.name, text: await f.text() });
+      }
+    }
+    return texts;
+  }
+
+  // Spotify ships two formats: "Extended streaming history" (every play since
+  // the account was opened) and the lighter "Account data" (last ~12 months).
+  function parseRecords(entries) {
+    var extended = [], basic = [];
+    entries.forEach(function (e) {
+      var arr;
+      try { arr = JSON.parse(e.text); } catch (err) { return; }
+      if (!Array.isArray(arr)) return;
+      arr.forEach(function (r) {
+        if (r.ts !== undefined) {
+          var t = Date.parse(r.ts);
+          if (isNaN(t)) return;
+          if (r.master_metadata_track_name) {
+            extended.push({ t: t, ms: +r.ms_played || 0, track: r.master_metadata_track_name, artist: r.master_metadata_album_artist_name || "Bilinmeyen sanatçı" });
+          } else if (r.episode_name || r.episode_show_name || r.audiobook_title) {
+            extended.push({ t: t, ms: +r.ms_played || 0, pod: true });
+          }
+        } else if (r.endTime !== undefined) {
+          var tb = Date.parse(String(r.endTime).replace(" ", "T") + ":00Z");
+          if (isNaN(tb)) return;
+          if (r.trackName) basic.push({ t: tb, ms: +r.msPlayed || 0, track: r.trackName, artist: r.artistName || "Bilinmeyen sanatçı" });
+          else if (r.podcastName || r.episodeName) basic.push({ t: tb, ms: +r.msPlayed || 0, pod: true });
+        }
+      });
+    });
+    // If both formats were uploaded they overlap, so prefer the complete one.
+    if (extended.length) return { records: extended, kind: "extended" };
+    return { records: basic, kind: basic.length ? "basic" : "none" };
+  }
+
+  /* ---------- Demo data ---------- */
+
+  function demoRecords() {
+    var seed = 20130314;
+    function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+    var syll = ["Gece", "Mavi", "Neon", "Kuş", "Deniz", "Ayna", "Kum", "Yol", "Rüzgâr", "Sis", "Kahve", "Plak", "Taş", "Ateş", "Yağmur", "Kar", "Işık", "Gölge", "Duman", "Kıyı"];
+    var tail = [" Yolcuları", " Sokak", " Kuşlar", " Orkestrası", " ve Arkadaşları", " Kulübü", " Kardeşler", "", " Projesi", " Trio"];
+    var words = ["Sabah", "Eski", "Uzak", "Son", "İlk", "Kırmızı", "Sessiz", "Yarım", "Beyaz", "Sıcak", "Kayıp", "Yeni"];
+    var nouns = ["Mektup", "Şehir", "Balkon", "Tren", "Yaz", "Sokak", "Hikâye", "Pazar", "Telefon", "Fotoğraf", "Liman", "Kapı"];
+    var start = Date.UTC(2013, 2, 14), end = Date.UTC(2026, 8, 30);
+    var span = end - start;
+    var artists = [];
+    for (var a = 0; a < 46; a++) {
+      var name = syll[Math.floor(rnd() * syll.length)] + tail[Math.floor(rnd() * tail.length)];
+      if (artists.some(function (x) { return x.name === name; })) { a--; continue; }
+      var tracks = [];
+      for (var k = 0; k < 10; k++) tracks.push(words[Math.floor(rnd() * words.length)] + " " + nouns[Math.floor(rnd() * nouns.length)]);
+      artists.push({
+        name: name, tracks: tracks,
+        peak: rnd(), width: 0.06 + rnd() * 0.22,
+        base: rnd() < 0.18 ? 0.25 : 0.02, weight: 0.4 + rnd() * 1.4
+      });
+    }
+    var hourW = [5, 3, 2, 1, 1, 1, 2, 4, 7, 8, 7, 7, 8, 8, 8, 8, 9, 10, 11, 12, 13, 13, 11, 8];
+    var hourSum = hourW.reduce(function (s, x) { return s + x; }, 0);
+    function pickHour() {
+      var r = rnd() * hourSum;
+      for (var h = 0; h < 24; h++) { r -= hourW[h]; if (r <= 0) return h; }
+      return 23;
+    }
+    var out = [];
+    var days = Math.floor(span / 864e5);
+    for (var d = 0; d < days; d++) {
+      var x = d / days;
+      var ws = artists.map(function (ar) {
+        var g = Math.exp(-Math.pow((x - ar.peak) / ar.width, 2));
+        return ar.weight * (ar.base + g);
+      });
+      var total = ws.reduce(function (s, w) { return s + w; }, 0);
+      var plays = Math.floor(10 + rnd() * 30 + x * 15);
+      for (var p = 0; p < plays; p++) {
+        var r = rnd() * total, idx = 0;
+        while (idx < ws.length - 1 && (r -= ws[idx]) > 0) idx++;
+        var ar = artists[idx];
+        var ti = Math.floor(Math.pow(rnd(), 1.8) * ar.tracks.length);
+        var skipped = rnd() < 0.2;
+        out.push({
+          t: start + d * 864e5 + pickHour() * HOUR + Math.floor(rnd() * HOUR),
+          ms: skipped ? Math.floor(rnd() * 25000) : Math.floor(150000 + rnd() * 110000),
+          track: ar.tracks[ti], artist: ar.name
+        });
+      }
+      if (rnd() < 0.15) out.push({ t: start + d * 864e5 + 8 * HOUR, ms: Math.floor(600000 + rnd() * 2400000), pod: true });
+    }
+    out.push({ t: start + 19 * HOUR, ms: 214000, track: artists[0].tracks[0], artist: artists[0].name });
+    return out;
+  }
+
+  /* ---------- Aggregation ---------- */
+
+  function aggregate(records) {
+    records.sort(function (a, b) { return a.t - b.t; });
+    var music = records.filter(function (r) { return !r.pod; });
+    if (!music.length) throw new Error("Dosyada müzik dinleme kaydı bulamadım.");
+    var first = new Date(music[0].t), last = new Date(music[music.length - 1].t);
+    var y0 = first.getFullYear(), m0 = first.getMonth();
+    var months = (last.getFullYear() - y0) * 12 + last.getMonth() - m0 + 1;
+
+    var A = { ms: 0, plays: 0, podMs: 0, skips: 0, first: music[0], last: music[music.length - 1], y0: y0, m0: m0, months: months };
+    var artists = new Map(), tracks = new Map(), years = new Map();
+    var heat = []; for (var i = 0; i < 7; i++) heat.push(new Float64Array(24));
+    var artistMonth = new Map();
+    var days = new Set();
+
+    records.forEach(function (r) {
+      if (r.pod) { A.podMs += r.ms; return; }
+      var d = new Date(r.t);
+      var y = d.getFullYear();
+      var play = r.ms >= MIN_PLAY ? 1 : 0;
+      A.ms += r.ms; A.plays += play;
+      if (!play) A.skips++;
+      days.add(y * 400 + d.getMonth() * 32 + d.getDate());
+
+      var ar = artists.get(r.artist);
+      if (!ar) { ar = { name: r.artist, ms: 0, plays: 0, first: r.t }; artists.set(r.artist, ar); }
+      ar.ms += r.ms; ar.plays += play;
+
+      var key = r.track + "\u0001" + r.artist;
+      var tr = tracks.get(key);
+      if (!tr) { tr = { track: r.track, artist: r.artist, ms: 0, plays: 0 }; tracks.set(key, tr); }
+      tr.ms += r.ms; tr.plays += play;
+
+      var yr = years.get(y);
+      if (!yr) { yr = { year: y, ms: 0, plays: 0, artists: new Map(), tracks: new Map() }; years.set(y, yr); }
+      yr.ms += r.ms; yr.plays += play;
+      var ya = yr.artists.get(r.artist) || 0; yr.artists.set(r.artist, ya + r.ms);
+      var yt = yr.tracks.get(key);
+      if (!yt) { yt = { track: r.track, artist: r.artist, plays: 0, ms: 0 }; yr.tracks.set(key, yt); }
+      yt.plays += play; yt.ms += r.ms;
+
+      heat[(d.getDay() + 6) % 7][d.getHours()] += r.ms;
+
+      var mi = (y - y0) * 12 + d.getMonth() - m0;
+      var am = artistMonth.get(r.artist);
+      if (!am) { am = new Float64Array(months); artistMonth.set(r.artist, am); }
+      am[mi] += r.ms;
+    });
+
+    A.artists = Array.from(artists.values()).sort(function (a, b) { return b.ms - a.ms; });
+    A.tracks = Array.from(tracks.values()).sort(function (a, b) { return b.plays - a.plays || b.ms - a.ms; });
+    A.years = Array.from(years.values()).sort(function (a, b) { return a.year - b.year; });
+    A.heat = heat;
+    A.activeDays = days.size;
+    A.artistMonth = artistMonth;
+    return A;
+  }
+
+  /* ---------- Rendering the page ---------- */
+
+  function rankList(items, opts) {
+    var max = items.length ? opts.value(items[0]) : 1;
+    return items.map(function (it, i) {
+      return '<li class="' + (i === 0 ? "top" : "") + '"><span class="n">' + (i + 1) + '</span>' +
+        '<span class="t" title="' + esc(opts.title(it)) + '">' + opts.label(it) + '</span>' +
+        '<span class="m">' + opts.meta(it) + '</span>' +
+        (opts.meter ? '<span class="n"></span><span class="meter"><i style="width:' + (opts.value(it) / max * 100).toFixed(1) + '%"></i></span>' : "") +
+        '</li>';
+    }).join("");
+  }
+  var artistOpts = {
+    value: function (a) { return a.ms; }, title: function (a) { return a.name; },
+    label: function (a) { return esc(a.name); }, meta: function (a) { return fmtHours(a.ms); }, meter: true
+  };
+  var trackOpts = {
+    value: function (t) { return t.plays; }, title: function (t) { return t.track + " — " + t.artist; },
+    label: function (t) { return esc(t.track) + ' <span>· ' + esc(t.artist) + '</span>'; },
+    meta: function (t) { return nf.format(t.plays) + " kez"; }, meter: false
+  };
+
+  function render(A, kind, isDemo) {
+    var banner = $("banner");
+    banner.className = "banner hidden";
+    if (isDemo) {
+      banner.className = "banner";
+      banner.innerHTML = '<span>Şu an <strong>örnek veri</strong> görüyorsun. Sanatçılar ve şarkılar uydurma.</span><button type="button" data-reset>Kendi verimi yükle</button>';
+    } else if (kind === "basic") {
+      banner.className = "banner warn";
+      banner.innerHTML = '<span>Bu dosya sadece yaklaşık son bir yılı kapsıyor. Bütün geçmişin için Spotify\'dan <strong>"Extended streaming history"</strong> iste.</span>';
+    }
+
+    var totalH = hours(A.ms);
+    $("since").textContent = fmtDate(A.first.t) + " ile " + fmtDate(A.last.t) + " arasında";
+    $("bigHours").innerHTML = nf.format(Math.round(totalH)) + "<small>saat müzik</small>";
+    var dayCount = totalH / 24;
+    $("bigSub").textContent = "Yani aralıksız " + nf.format(Math.round(dayCount)) + " gün. Bu sürede " +
+      nf.format(A.plays) + " şarkı dinledin.";
+
+    var topA = A.artists[0], topT = A.tracks[0];
+    var stats = [
+      ["Farklı sanatçı", nf.format(A.artists.length), ""],
+      ["Farklı şarkı", nf.format(A.tracks.length), ""],
+      ["Müzik dinlediğin gün", nf.format(A.activeDays), "Günde ortalama " + nf.format(Math.round(A.ms / A.activeDays / 60000)) + " dakika"],
+      ["Atladığın şarkı", nf.format(A.skips), "İlk 30 saniyede geçtiklerin"],
+      ["Bir numaralı sanatçın", esc(topA.name), fmtHours(topA.ms), true],
+      ["Bir numaralı şarkın", esc(topT.track), esc(topT.artist) + " · " + nf.format(topT.plays) + " kez", true]
+    ];
+    if (A.podMs > HOUR) stats.splice(4, 0, ["Podcast", fmtHours(A.podMs), ""]);
+    $("stats").innerHTML = stats.map(function (s) {
+      return '<div class="stat"><div class="k">' + s[0] + '</div><div class="v' + (s[3] ? " sm" : "") + '">' + s[1] + '</div>' +
+        (s[2] ? '<div class="d">' + s[2] + '</div>' : "") + '</div>';
+    }).join("");
+    $("firstSong").innerHTML = '<div class="k">Kayıtlardaki ilk şarkın · ' + fmtDate(A.first.t) + '</div>' +
+      '<div class="v">' + esc(A.first.track) + ' <span class="muted">— ' + esc(A.first.artist) + '</span></div>';
+
+    // Years
+    var maxY = Math.max.apply(null, A.years.map(function (y) { return y.ms; }));
+    $("yearBars").innerHTML = A.years.map(function (y) {
+      return '<button type="button" data-year="' + y.year + '" class="' + (y.ms === maxY ? "peak" : "") + '" title="' + y.year + ': ' + fmtHours(y.ms) + '">' +
+        '<span class="val">' + nf.format(Math.round(hours(y.ms))) + '</span>' +
+        '<span class="bar" style="height:' + Math.max(2, y.ms / maxY * 100).toFixed(1) + '%"></span>' +
+        '<span class="lbl">’' + String(y.year).slice(2) + '</span></button>';
+    }).join("");
+    $("years").innerHTML = A.years.slice().reverse().map(function (y) {
+      var ta = Array.from(y.artists.entries()).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5)
+        .map(function (e) { return { name: e[0], ms: e[1] }; });
+      var tt = Array.from(y.tracks.values()).sort(function (a, b) { return b.plays - a.plays || b.ms - a.ms; }).slice(0, 5);
+      return '<article class="year" id="y' + y.year + '"><div class="yh"><span class="yn display">' + y.year + '</span>' +
+        '<span class="yt">' + fmtHours(y.ms) + '<br>' + nf.format(y.plays) + ' şarkı</span></div>' +
+        '<h3>Sanatçılar</h3><ol class="rank">' + rankList(ta, artistOpts) + '</ol>' +
+        '<h3>Şarkılar</h3><ol class="rank">' + rankList(tt, trackOpts) + '</ol></article>';
+    }).join("");
+
+    renderAllTime("artists");
+    renderHeat(A);
+    race.load(A);
+  }
+
+  function renderAllTime(tab) {
+    document.querySelectorAll(".tabs button").forEach(function (b) {
+      b.setAttribute("aria-selected", b.dataset.tab === tab ? "true" : "false");
+    });
+    $("allTime").innerHTML = tab === "artists"
+      ? rankList(state.A.artists.slice(0, 25), artistOpts)
+      : rankList(state.A.tracks.slice(0, 25), trackOpts);
+  }
+
+  function renderHeat(A) {
+    var max = 0, total = 0, dayTot = new Array(7).fill(0), hourTot = new Array(24).fill(0);
+    A.heat.forEach(function (row, d) {
+      row.forEach(function (v, h) { max = Math.max(max, v); total += v; dayTot[d] += v; hourTot[h] += v; });
+    });
+    var html = "<span></span>";
+    for (var h = 0; h < 24; h++) html += '<span class="hl">' + h + '</span>';
+    A.heat.forEach(function (row, d) {
+      html += '<span class="dl">' + DAYS[d] + '</span>';
+      row.forEach(function (v, hh) {
+        var o = max ? Math.pow(v / max, 0.8) : 0;
+        html += '<span class="c" style="opacity:' + Math.max(0.05, o).toFixed(3) + '" title="' + DAYS_LONG[d] + ' ' + hh + ':00 · ' + fmtHours(v) + '"></span>';
+      });
+    });
+    $("heat").innerHTML = html;
+
+    var peakH = hourTot.indexOf(Math.max.apply(null, hourTot));
+    var peakD = dayTot.indexOf(Math.max.apply(null, dayTot));
+    var night = hourTot.slice(0, 5).reduce(function (s, x) { return s + x; }, 0) / total;
+    var morning = hourTot.slice(5, 12).reduce(function (s, x) { return s + x; }, 0) / total;
+    var label = night > 0.12 ? "Gece kuşusun." : morning > 0.35 ? "Güne müzikle başlıyorsun." : peakH >= 17 ? "Akşamları açılıyorsun." : "Gün boyu müzik.";
+    $("clockTitle").textContent = label;
+    var facts = [
+      ["En yoğun saatin", peakH + ":00 – " + (peakH + 1) % 24 + ":00"],
+      ["En çok dinlediğin gün", DAYS_LONG[peakD]],
+      ["Gece yarısından sonra (00–05)", "%" + nf.format(Math.round(night * 100))]
+    ];
+    $("heatFacts").innerHTML = facts.map(function (f) {
+      return '<div class="stat"><div class="k">' + f[0] + '</div><div class="v sm">' + f[1] + '</div></div>';
+    }).join("");
+  }
+
+  /* ---------- Artist race (canvas) ---------- */
+
+  var race = (function () {
+    var canvas = $("raceCanvas"), ctx = canvas.getContext("2d");
+    var TOP = 10;
+    var A = null, data = {}, series = null;
+    var t = 0, playing = false, lastTs = 0, snap = true, rec = null, holdUntil = 0;
+    var disp = new Map(); // artist -> { y, a } for smooth reordering
+
+    function build(mode) {
+      var names = Array.from(A.artistMonth.keys());
+      var arrs = names.map(function (n) { return A.artistMonth.get(n); });
+      var M = A.months, cur = new Float64Array(names.length), cand = new Set();
+      for (var m = 0; m < M; m++) {
+        for (var i = 0; i < names.length; i++) {
+          cur[i] += arrs[i][m];
+          if (mode === "window" && m >= 12) cur[i] -= arrs[i][m - 12];
+        }
+        // Keep the top TOP+2 of this month as candidates.
+        var top = [];
+        for (var j = 0; j < names.length; j++) {
+          if (cur[j] <= 0) continue;
+          if (top.length < TOP + 2 || cur[j] > cur[top[top.length - 1]]) {
+            top.push(j);
+            top.sort(function (a, b) { return cur[b] - cur[a]; });
+            if (top.length > TOP + 2) top.pop();
+          }
+        }
+        top.forEach(function (k) { cand.add(k); });
+      }
+      var idx = Array.from(cand);
+      var vals = idx.map(function () { return new Float64Array(M); });
+      var run = idx.map(function () { return 0; });
+      for (var mm = 0; mm < M; mm++) {
+        idx.forEach(function (k, c) {
+          run[c] += arrs[k][mm];
+          if (mode === "window" && mm >= 12) run[c] -= arrs[k][mm - 12];
+          vals[c][mm] = Math.max(0, run[c]);
+        });
+      }
+      return {
+        names: idx.map(function (k) { return names[k]; }),
+        vals: vals,
+        colors: idx.map(function (k) { return colorFor(names[k]); })
+      };
+    }
+
+    function colorFor(name) {
+      var h = 0;
+      for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+      var palette = ["#1ed760", "#ff4d2e", "#ffc53d", "#4da3ff", "#c084fc", "#ff7eb6", "#2dd4bf", "#f97316", "#a3e635", "#60a5fa", "#f472b6", "#facc15"];
+      return palette[h % palette.length];
+    }
+
+    function load(agg) {
+      A = agg; data = {};
+      stop();
+      $("scrub").max = String(A.months - 1);
+      setMode($("mode").value);
+      setRatio($("ratio").value);
+    }
+
+    function setMode(mode) {
+      if (!data[mode]) data[mode] = build(mode);
+      series = data[mode];
+      series.mode = mode;
+      disp.clear();
+      snap = true;
+      draw(0);
+    }
+
+    function setRatio(r) {
+      var dims = { "16:9": [1920, 1080], "9:16": [1080, 1920], "1:1": [1080, 1080] }[r];
+      canvas.width = dims[0]; canvas.height = dims[1];
+      snap = true;
+      draw(0);
+    }
+
+    function layout() {
+      var W = canvas.width, H = canvas.height, portrait = H > W * 1.2, square = !portrait && W < H * 1.2;
+      var u = Math.min(W, H);
+      return {
+        W: W, H: H, u: u, portrait: portrait,
+        pad: W * (portrait ? 0.07 : 0.05),
+        top: H * (portrait ? 0.2 : square ? 0.24 : 0.25),
+        bottom: H * (portrait ? 0.76 : square ? 0.84 : 0.9),
+        valueSpace: W * (portrait ? 0.24 : square ? 0.2 : 0.14)
+      };
+    }
+
+    function monthLabel(m) {
+      var mm = A.m0 + Math.floor(m);
+      return { month: MONTHS[mm % 12], year: A.y0 + Math.floor(mm / 12) };
+    }
+
+    function draw(dt) {
+      if (!series) return;
+      var L = layout(), W = L.W, H = L.H, M = A.months;
+      var i = Math.min(Math.floor(t), M - 1), f = t - i, i2 = Math.min(i + 1, M - 1);
+      var cur = series.names.map(function (n, c) {
+        return { n: n, c: c, v: series.vals[c][i] * (1 - f) + series.vals[c][i2] * f };
+      }).filter(function (e) { return e.v > 0; });
+      cur.sort(function (a, b) { return b.v - a.v; });
+      var shown = cur.slice(0, TOP);
+      var maxV = shown.length ? shown[0].v : 1;
+
+      // Ease each bar's slot toward its rank so overtakes glide.
+      var k = snap ? 1 : 1 - Math.exp(-dt * 9);
+      var live = new Set();
+      shown.forEach(function (e, r) {
+        live.add(e.n);
+        var s = disp.get(e.n);
+        if (!s) { s = { y: snap ? r : TOP + 0.5, a: snap ? 1 : 0 }; disp.set(e.n, s); }
+        s.y += (r - s.y) * k; s.a += (1 - s.a) * k; s.v = e.v; s.c = e.c;
+      });
+      disp.forEach(function (s, n) {
+        if (live.has(n)) return;
+        s.y += (TOP + 0.5 - s.y) * k; s.a += (0 - s.a) * k;
+        var e = cur.find(function (x) { return x.n === n; });
+        s.v = e ? e.v : s.v;
+        if (s.a < 0.02) disp.delete(n);
+      });
+      snap = false;
+
+      // Background
+      ctx.fillStyle = "#0b0d0c";
+      ctx.fillRect(0, 0, W, H);
+
+      var fam = '"Bricolage Grotesque", Geist, system-ui, sans-serif';
+      var body = 'Geist, system-ui, sans-serif';
+      ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = "#f1f2ee";
+      ctx.font = "700 " + Math.round(L.u * (L.portrait ? 0.062 : 0.052)) + "px " + fam;
+      ctx.textAlign = "left";
+      var titleY = L.pad + L.u * 0.05;
+      ctx.fillText("En çok dinlediğim sanatçılar", L.pad, titleY);
+      ctx.fillStyle = "#949a95";
+      ctx.font = "500 " + Math.round(L.u * (L.portrait ? 0.034 : 0.026)) + "px " + body;
+      ctx.fillText(series.mode === "total" ? "İlk günden bu yana toplam dinleme süresi" : "Son 12 aydaki dinleme süresi", L.pad, titleY + L.u * (L.portrait ? 0.06 : 0.048));
+
+      // Date
+      var ml = monthLabel(i);
+      ctx.textAlign = "right";
+      if (L.portrait) {
+        ctx.fillStyle = "#1ed760";
+        ctx.font = "800 " + Math.round(W * 0.2) + "px " + fam;
+        ctx.fillText(String(ml.year), W - L.pad, H * 0.9);
+        ctx.fillStyle = "#949a95";
+        ctx.font = "600 " + Math.round(W * 0.05) + "px " + fam;
+        ctx.fillText(ml.month, W - L.pad, H * 0.9 - W * 0.2);
+      } else {
+        ctx.fillStyle = "rgba(241,242,238,.13)";
+        ctx.font = "800 " + Math.round(L.u * 0.2) + "px " + fam;
+        ctx.fillText(String(ml.year), W - L.pad, L.bottom - L.u * 0.02);
+        ctx.fillStyle = "rgba(241,242,238,.32)";
+        ctx.font = "600 " + Math.round(L.u * 0.05) + "px " + fam;
+        ctx.fillText(ml.month, W - L.pad, L.bottom - L.u * 0.22);
+      }
+
+      // Bars
+      var rowH = (L.bottom - L.top) / TOP, barH = rowH * 0.76;
+      var maxW = W - L.pad * 2 - L.valueSpace;
+      var nameFont = Math.round(barH * 0.42), valFont = Math.round(barH * 0.36);
+      var items = Array.from(disp.entries()).sort(function (a, b) { return b[1].y - a[1].y; });
+      items.forEach(function (it) {
+        var name = it[0], s = it[1];
+        var y = L.top + s.y * rowH + (rowH - barH) / 2;
+        if (y > H) return;
+        var w = Math.max(barH * 0.2, s.v / maxV * maxW);
+        ctx.globalAlpha = Math.max(0, Math.min(1, s.a));
+        ctx.fillStyle = series.colors[s.c];
+        roundRect(L.pad, y, w, barH, Math.min(barH * 0.18, 14));
+        ctx.fill();
+
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.font = "700 " + nameFont + "px " + fam;
+        var label = fit(name, maxW + L.valueSpace * 0.4);
+        var tw = ctx.measureText(label).width;
+        var cy = y + barH / 2;
+        var after;
+        if (tw + barH * 0.6 < w) {
+          ctx.fillStyle = "#0b0d0c";
+          ctx.fillText(label, L.pad + barH * 0.3, cy);
+          after = L.pad + w + barH * 0.25;
+        } else {
+          ctx.fillStyle = "#f1f2ee";
+          ctx.fillText(label, L.pad + w + barH * 0.25, cy);
+          after = L.pad + w + barH * 0.5 + tw;
+        }
+        ctx.fillStyle = "#949a95";
+        ctx.font = "500 " + valFont + "px " + body;
+        ctx.fillText(nf.format(Math.round(hours(s.v))) + " saat", after, cy);
+        ctx.textBaseline = "alphabetic";
+      });
+      ctx.globalAlpha = 1;
+
+      // Footer
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#5b615d";
+      ctx.font = "500 " + Math.round(L.u * 0.02) + "px " + body;
+      ctx.fillText("Spotify dinleme geçmişim · " + A.y0 + "–" + new Date(A.last.t).getFullYear(), L.pad, H - L.pad * 0.6);
+
+      $("when").textContent = ml.month.slice(0, 3) + " " + ml.year;
+      if (document.activeElement !== $("scrub")) $("scrub").value = String(t);
+    }
+
+    function fit(text, max) {
+      if (ctx.measureText(text).width <= max) return text;
+      var s = text;
+      while (s.length > 1 && ctx.measureText(s + "…").width > max) s = s.slice(0, -1);
+      return s + "…";
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x, y + h);
+      ctx.closePath();
+    }
+
+    function frame(ts) {
+      if (!playing) return;
+      var dt = lastTs ? Math.min(0.1, (ts - lastTs) / 1000) : 0;
+      lastTs = ts;
+      var end = A.months - 1;
+      if (t < end) {
+        t = Math.min(end, t + dt * parseFloat($("speed").value));
+      } else if (!holdUntil) {
+        holdUntil = ts + (rec ? 2000 : 0);
+      }
+      draw(dt);
+      if (holdUntil && ts >= holdUntil) { finish(); return; }
+      requestAnimationFrame(frame);
+    }
+
+    function play() {
+      if (!A) return;
+      if (t >= A.months - 1) { t = 0; snap = true; }
+      playing = true; lastTs = 0; holdUntil = 0;
+      $("play").textContent = "Durdur";
+      requestAnimationFrame(frame);
+    }
+    function stop() {
+      playing = false;
+      $("play").textContent = "Oynat";
+    }
+    function finish() {
+      stop();
+      if (rec) rec.stop();
+    }
+
+    function seek(v) {
+      t = v; snap = true;
+      draw(0);
+    }
+
+    function record() {
+      if (!window.MediaRecorder || !canvas.captureStream) {
+        note("Bu tarayıcı video kaydını desteklemiyor. Bilgisayarda Chrome ile dene.", true);
+        return;
+      }
+      var types = ["video/mp4;codecs=avc1.640028", "video/mp4;codecs=avc1", "video/mp4", "video/webm;codecs=vp9", "video/webm"];
+      var type = types.find(function (x) { return MediaRecorder.isTypeSupported(x); });
+      if (!type) { note("Bu tarayıcı video kaydını desteklemiyor.", true); return; }
+      var chunks = [];
+      var r = new MediaRecorder(canvas.captureStream(30), { mimeType: type, videoBitsPerSecond: 12e6 });
+      r.ondataavailable = function (e) { if (e.data.size) chunks.push(e.data); };
+      r.onstop = function () {
+        var ext = type.indexOf("mp4") >= 0 ? "mp4" : "webm";
+        var blob = new Blob(chunks, { type: type.split(";")[0] });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "sanatci-yarisi-" + $("ratio").value.replace(":", "x") + "." + ext;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+        rec = null;
+        lock(false);
+        note("Video indirildi" + (ext === "webm" ? " (WebM formatında; Premiere için HandBrake ya da CapCut ile MP4'e çevirebilirsin)." : "."), false);
+      };
+      rec = r;
+      lock(true);
+      var secs = Math.round((A.months - 1) / parseFloat($("speed").value) + 2);
+      note("Kaydediliyor… yaklaşık " + secs + " saniye sürecek. Bitene kadar bu sekmede kal.", true);
+      t = 0; snap = true; disp.clear();
+      r.start(500);
+      play();
+    }
+
+    function lock(on) {
+      ["play", "record", "mode", "ratio", "speed", "scrub"].forEach(function (id) { $(id).disabled = on; });
+    }
+    function note(text, warn) {
+      var n = $("recNote");
+      n.textContent = text;
+      n.className = "rec-note" + (warn ? " on" : "");
+    }
+
+    return {
+      load: load, setMode: setMode, setRatio: setRatio, seek: seek, record: record,
+      toggle: function () { playing ? stop() : play(); }
+    };
+  })();
+
+  /* ---------- Wiring ---------- */
+
+  var state = { A: null };
+
+  function setStatus(text, isError) {
+    var s = $("status");
+    s.textContent = text || "";
+    s.className = "status" + (isError ? " error" : "");
+  }
+
+  function show(A, kind, isDemo) {
+    state.A = A;
+    $("upload").classList.add("hidden");
+    $("results").classList.remove("hidden");
+    $("reset").classList.remove("hidden");
+    render(A, kind, isDemo);
+    window.scrollTo(0, 0);
+  }
+
+  async function handleFiles(files) {
+    if (!files || !files.length) return;
+    try {
+      setStatus("Dosyalar okunuyor…");
+      var entries = await readFiles(files);
+      if (!entries.length) throw new Error("Bu dosyada dinleme geçmişi bulamadım. Spotify'dan gelen ZIP'i ya da içindeki \"Streaming_History\" JSON dosyalarını yükle.");
+      setStatus(entries.length + " dosya bulundu, hesaplanıyor…");
+      await new Promise(function (r) { setTimeout(r, 30); });
+      var parsed = parseRecords(entries);
+      if (!parsed.records.length) throw new Error("Dosyalarda dinleme kaydı bulamadım.");
+      var A = aggregate(parsed.records);
+      setStatus("");
+      show(A, parsed.kind, false);
+    } catch (err) {
+      console.error(err);
+      setStatus(err.message || "Dosya okunamadı.", true);
+    }
+  }
+
+  function reset() {
+    state.A = null;
+    $("results").classList.add("hidden");
+    $("upload").classList.remove("hidden");
+    $("reset").classList.add("hidden");
+    $("file").value = "";
+    setStatus("");
+    window.scrollTo(0, 0);
+  }
+
+  var drop = $("drop");
+  ["dragenter", "dragover"].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); });
+  });
+  ["dragleave", "drop"].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("over"); });
+  });
+  drop.addEventListener("drop", function (e) { handleFiles(e.dataTransfer.files); });
+  window.addEventListener("dragover", function (e) { e.preventDefault(); });
+  window.addEventListener("drop", function (e) { e.preventDefault(); });
+
+  $("pick").addEventListener("click", function () { $("file").click(); });
+  $("file").addEventListener("change", function (e) { handleFiles(e.target.files); });
+  $("demo").addEventListener("click", function () {
+    setStatus("Örnek veri hazırlanıyor…");
+    setTimeout(function () { show(aggregate(demoRecords()), "extended", true); setStatus(""); }, 30);
+  });
+  $("reset").addEventListener("click", reset);
+  document.addEventListener("click", function (e) {
+    if (e.target.closest("[data-reset]")) reset();
+    var yb = e.target.closest("[data-year]");
+    if (yb) $("y" + yb.dataset.year).scrollIntoView({ behavior: "smooth", block: "start", inline: "start" });
+    var tab = e.target.closest("[data-tab]");
+    if (tab) renderAllTime(tab.dataset.tab);
+  });
+
+  $("play").addEventListener("click", function () { race.toggle(); });
+  $("record").addEventListener("click", function () { race.record(); });
+  $("mode").addEventListener("change", function (e) { race.setMode(e.target.value); });
+  $("ratio").addEventListener("change", function (e) { race.setRatio(e.target.value); });
+  $("scrub").addEventListener("input", function (e) { race.seek(parseFloat(e.target.value)); });
+
+  // Make sure the canvas uses the real fonts, not the fallback.
+  if (document.fonts && document.fonts.load) {
+    Promise.all([
+      document.fonts.load('700 40px "Bricolage Grotesque"'),
+      document.fonts.load('500 20px Geist')
+    ]).then(function () { if (state.A) race.seek(parseFloat($("scrub").value) || 0); }).catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>

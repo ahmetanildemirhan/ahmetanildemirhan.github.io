@@ -7,6 +7,7 @@ Kişisel portfolyo sitesi. Tek sayfa, ek kurulum gerektirmez.
 - `assets/site.css`, `assets/site.js` — tüm sayfaların ortak tasarımı ve davranışı (tema, dil, video oynatıcı)
 - `assets/ahmet.jpg` — profil fotoğrafı, `assets/og.png` — link paylaşım kartı
 - `cv/cv.html` — CV kaynağı; `assets/Ahmet-Anil-Demirhan-CV.pdf` buradan üretilir
+- `spotify/` — Spotify Zaman Makinesi: Spotify dinleme geçmişini tarayıcıda analiz eden kişisel sayfa (veri hiçbir yere yüklenmez)
 - `404.html`, `sitemap.xml`, `robots.txt` — bulunamayan sayfa ve arama motoru ayarları
 
 ## Video eklemek / çıkarmak
