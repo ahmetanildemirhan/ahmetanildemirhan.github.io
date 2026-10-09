@@ -127,7 +127,7 @@
             extended.push({
               t: t, ms: ms, track: r.master_metadata_track_name, artist: r.master_metadata_album_artist_name || "Bilinmeyen sanatçı",
               album: r.master_metadata_album_album_name || "", skip: ms < MIN_PLAY && (r.skipped === true || r.reason_end === "fwdbtn"),
-              platform: r.platform || "", country: r.conn_country || "", rs: r.reason_start || "", re: r.reason_end || "",
+              platform: r.platform || "", rs: r.reason_start || "", re: r.reason_end || "",
               shuffle: r.shuffle === true, offline: r.offline === true, incognito: r.incognito_mode === true
             });
           } else if (r.episode_name || r.episode_show_name || r.audiobook_title) {
@@ -202,7 +202,6 @@
           ms: skipped ? Math.floor(rnd() * 25000) : Math.floor(150000 + rnd() * 110000),
           track: ar.tracks[ti], artist: ar.name, album: ar.name + " (Albüm)", skip: skipped,
           platform: r1 < 0.55 ? "iOS 12.1 (iPhone10,6)" : r1 < 0.8 ? "OS X 10.14 [x86 8]" : r1 < 0.92 ? "Partner SCEI sony_tv ps4" : "web_player windows 10",
-          country: rnd() < 0.97 ? "TR" : ["DE", "GB", "IT"][Math.floor(rnd() * 3)],
           rs: skipped ? "fwdbtn" : rnd() < 0.5 ? "clickrow" : "trackdone", re: skipped ? "fwdbtn" : rnd() < 0.6 ? "trackdone" : "endplay",
           shuffle: rnd() < 0.2, offline: rnd() < 0.05, incognito: false
         });
@@ -793,26 +792,20 @@
     if (/^(logout|unexpected-exit|unexpected-exit-while-paused)$/.test(r)) return 4;
     return 5;
   }
-  var regionNames = null;
-  try { regionNames = new Intl.DisplayNames(["tr"], { type: "region" }); } catch (e) {}
-  function countryName(cc) {
-    if (!cc || cc === "ZZ" || cc === "--" || cc === "EU") return "Bilinmiyor";
-    try { return (regionNames && regionNames.of(cc)) || cc; } catch (e) { return cc; }
-  }
 
   // Every music play in compact columns (times in seconds, durations, an index
-  // into a track list, and small codes for device, country and how it started
+  // into a track list, and small codes for device and how it started
   // and ended). 13 years fit in a few megabytes this way.
   var PLAYS_VERSION = 2;
   function encodePlays(records) {
     var music = records.filter(function (r) { return !r.pod; });
     var n = music.length;
     var P = {
-      v: PLAYS_VERSION, artists: [], albums: [], tracks: [], devices: [], countries: [],
+      v: PLAYS_VERSION, artists: [], albums: [], tracks: [], devices: [],
       t: new Uint32Array(n), ms: new Uint32Array(n), tr: new Uint32Array(n),
-      dev: new Uint8Array(n), cc: new Uint8Array(n), rs: new Uint8Array(n), re: new Uint8Array(n), fl: new Uint8Array(n)
+      dev: new Uint8Array(n), rs: new Uint8Array(n), re: new Uint8Array(n), fl: new Uint8Array(n)
     };
-    var idx = { artists: new Map(), albums: new Map(), tracks: new Map(), devices: new Map(), countries: new Map() };
+    var idx = { artists: new Map(), albums: new Map(), tracks: new Map(), devices: new Map() };
     function code(kind, key, make) {
       var m = idx[kind], v = m.get(key);
       if (v === undefined) { v = P[kind].length; P[kind].push(make ? make() : key); m.set(key, v); }
@@ -825,7 +818,6 @@
       P.ms[i] = Math.min(r.ms, 4294967295);
       P.tr[i] = code("tracks", r.track + "\u0001" + r.artist, function () { return [r.track, a, al]; });
       P.dev[i] = Math.min(255, code("devices", deviceOf(r.platform)));
-      P.cc[i] = Math.min(255, code("countries", countryName(r.country)));
       P.rs[i] = r.rs === undefined ? 6 : startOf(r.rs);
       P.re[i] = r.re === undefined ? 5 : endOf(r.re);
       P.fl[i] = (r.shuffle ? 1 : 0) | (r.offline ? 2 : 0) | (r.incognito ? 4 : 0);
@@ -925,7 +917,6 @@
       chips("fMonth", MONTHS_SHORT.map(function (m, i) { return [i, m]; }));
       chips("fDay", DAYS.map(function (d, i) { return [i, d]; }));
       chips("fDevice", byCount(P.devices, countBy(P.dev, P.devices.length)));
-      chips("fCountry", byCount(P.countries, countBy(P.cc, P.countries.length)));
       chips("fStart", byCount(STARTS, countBy(P.rs, STARTS.length)));
       chips("fEnd", byCount(ENDS, countBy(P.re, ENDS.length)));
       var hours = "";
@@ -951,7 +942,7 @@
         firsts: $("xFirsts").getAttribute("aria-pressed") === "true",
         short: $("xShort").checked,
         years: picked("fYear"), months: picked("fMonth"), days: picked("fDay"),
-        devices: picked("fDevice"), countries: picked("fCountry"), starts: picked("fStart"), ends: picked("fEnd"),
+        devices: picked("fDevice"), starts: picked("fStart"), ends: picked("fEnd"),
         hFrom: +$("fHourFrom").value, hTo: +$("fHourTo").value,
         shuffle: tri("fShuffle"), offline: tri("fOffline"), incognito: tri("fIncognito"),
         count: $("fCount").value
@@ -997,7 +988,6 @@
           if (F.hFrom <= F.hTo ? (h < F.hFrom || h > F.hTo) : (h < F.hFrom && h > F.hTo)) continue;
         }
         if (F.devices && !F.devices[P.dev[i]]) continue;
-        if (F.countries && !F.countries[P.cc[i]]) continue;
         if (F.starts && !F.starts[P.rs[i]]) continue;
         if (F.ends && !F.ends[P.re[i]]) continue;
         if (F.shuffle !== null && !!(P.fl[i] & 1) !== F.shuffle) continue;
@@ -1013,7 +1003,7 @@
 
     // How many of the extra filters are on, shown on the "more filters" toggle.
     function showActive(F) {
-      var n = ["years", "months", "days", "devices", "countries", "starts", "ends"].filter(function (k) { return F[k]; }).length +
+      var n = ["years", "months", "days", "devices", "starts", "ends"].filter(function (k) { return F[k]; }).length +
         (F.hFrom !== 0 || F.hTo !== 23 ? 1 : 0) + ["shuffle", "offline", "incognito"].filter(function (k) { return F[k] !== null; }).length +
         (F.count ? 1 : 0);
       $("xMoreCount").textContent = n ? n + " açık" : "";
@@ -1107,11 +1097,11 @@
     // The current results as a spreadsheet file (opens in Excel / Numbers / Sheets).
     function exportCsv() {
       if (!hits.length) return;
-      var rows = [["Tarih", "Saat", "Şarkı", "Sanatçı", "Albüm", "Dinleme (sn)", "Cihaz", "Ülke", "Nasıl başladı", "Nasıl bitti", "Karışık", "Çevrimdışı"]];
+      var rows = [["Tarih", "Saat", "Şarkı", "Sanatçı", "Albüm", "Dinleme (sn)", "Cihaz", "Nasıl başladı", "Nasıl bitti", "Karışık", "Çevrimdışı"]];
       for (var j = 0; j < hits.length; j++) {
         var i = hits[hits.length - 1 - j], d = new Date(P.t[i] * 1000), tk = P.tracks[P.tr[i]];
         rows.push([iso(d), String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"),
-          tk[0], P.artists[tk[1]], P.albums[tk[2]] || "", Math.round(P.ms[i] / 1000), P.devices[P.dev[i]], P.countries[P.cc[i]],
+          tk[0], P.artists[tk[1]], P.albums[tk[2]] || "", Math.round(P.ms[i] / 1000), P.devices[P.dev[i]],
           STARTS[P.rs[i]], ENDS[P.re[i]], P.fl[i] & 1 ? "Evet" : "Hayır", P.fl[i] & 2 ? "Evet" : "Hayır"]);
       }
       var csv = "﻿" + rows.map(function (r) {
