@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anıl — Top 500</title>
+  <meta name="description" content="13 yılda Spotify'da en çok dinlediğim 500 şarkı: kaç kez dinlediğim, ne zaman keşfettiğim ve en çok hangi yıl dinlediğim.">
+  <meta name="robots" content="noindex">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Anıl — Top 500">
+  <meta property="og:description" content="13 yılda en çok dinlediğim 500 şarkı.">
+  <meta name="theme-color" content="#0b0d0c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../app.css?v=20261009b">
+  <style>
+    .t5-hero { padding: 64px 0 8px; }
+    .t5-hero h1 { font-size: clamp(56px, 11vw, 140px); margin-top: 10px; }
+    .t5-hero h1 span { color: var(--accent); }
+    .t5-hero .lead { color: var(--muted); font-size: 19px; max-width: 52ch; margin-top: 18px; }
+
+    .artist-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+    .artist-chips .chip { font-size: 14px; padding: 7px 14px; }
+
+    .t5-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-top: 28px; position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .t5-controls input[type="search"], .t5-controls select {
+      background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 15px; color: var(--text);
+    }
+    .t5-controls input[type="search"] { flex: 1; min-width: 200px; font-size: 16px; }
+    .t5-controls input:focus, .t5-controls select:focus { outline: none; border-color: var(--accent); }
+    .t5-controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+    .seg { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2); }
+    .seg button { border: none; background: none; padding: 7px 14px; border-radius: 999px; font-size: 14px; color: var(--muted); cursor: pointer; }
+    .seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); font-weight: 600; }
+    .t5-count { font-size: 14px; color: var(--muted); margin-top: 14px; }
+
+    .t5-list { list-style: none; margin-top: 8px; }
+    .t5-item { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto 64px; gap: 4px 18px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .t5-rank { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; font-size: 22px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+    .t5-main { min-width: 0; }
+    .t5-title { font-weight: 600; font-size: 17px; text-decoration: none; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+    .t5-title:hover { color: var(--accent); }
+    .t5-title svg { margin-left: 6px; opacity: .45; vertical-align: -1px; }
+    .t5-sub { font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .t5-sub button { background: none; border: none; padding: 0; color: var(--text); cursor: pointer; font-size: inherit; }
+    .t5-sub button:hover { color: var(--accent); }
+    .t5-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .t5-spark { display: block; width: 112px; height: 28px; }
+    .t5-spark rect { fill: var(--accent); }
+    .t5-spark rect.base { fill: var(--line); }
+    .t5-plays { text-align: right; line-height: 1.1; }
+    .t5-plays b { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-size: 22px; letter-spacing: -.02em; display: block; }
+    .t5-plays span { font-size: 12px; color: var(--muted); }
+
+    /* The top ten get the full treatment. */
+    .t5-item.big { grid-template-columns: 120px minmax(0, 1fr) auto 80px; padding: 26px 0; }
+    .t5-item.big .t5-rank { font-size: 88px; color: var(--accent); font-weight: 800; letter-spacing: -.05em; line-height: .9; }
+    .t5-item.big .t5-title { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-size: clamp(24px, 3.2vw, 34px); letter-spacing: -.025em; white-space: normal; }
+    .t5-item.big .t5-sub { font-size: 16px; white-space: normal; }
+    .t5-item.big .t5-spark { width: 168px; height: 44px; }
+    .t5-item.big .t5-plays b { font-size: 34px; }
+
+    .t5-empty { padding: 40px 0; color: var(--muted); }
+    .t5-back { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px; }
+
+    @media (max-width: 700px) {
+      .t5-item { grid-template-columns: 40px minmax(0, 1fr) 52px; gap: 2px 12px; }
+      .t5-item .t5-spark { grid-column: 2; grid-row: 2; width: 96px; height: 20px; margin-top: 4px; }
+      .t5-item .t5-plays { grid-column: 3; grid-row: 1; }
+      .t5-rank { font-size: 18px; }
+      .t5-item.big { grid-template-columns: 64px minmax(0, 1fr) 60px; padding: 20px 0; }
+      .t5-item.big .t5-rank { font-size: 48px; }
+      .t5-item.big .t5-spark { width: 120px; height: 28px; }
+      .t5-item.big .t5-plays b { font-size: 26px; }
+      .t5-controls { position: static; }
+      .t5-controls input[type="search"] { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="../../">Spotify Zaman Makinesi<span>.</span></a>
+    <a class="top-link" href="../">13 yılım</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="t5-hero">
+    <p class="eyebrow">Ahmet Anıl Demirhan · Spotify, 2013–2026</p>
+    <h1 class="display">Anıl <span>—</span> Top&nbsp;500</h1>
+    <p class="lead">13 yılda en çok dinlediğim 500 şarkı. Sıralama, şarkıyı kaç kez dinlediğime göre; 30 saniyeyi geçmeyen çalmalar sayılmadı. Şarkı adına dokunursan Spotify'da açılır.</p>
+    <div class="stats" id="t5Stats"></div>
+  </section>
+
+  <section class="block">
+    <p class="eyebrow">Listeye en çok girenler</p>
+    <h2 class="display">Kimin kaç şarkısı var?</h2>
+    <p class="intro-text">Bir sanatçıya dokunursan listede sadece onun şarkıları kalır.</p>
+    <div class="artist-chips" id="t5Artists"></div>
+  </section>
+
+  <section class="block" id="list">
+    <p class="eyebrow">Liste</p>
+    <h2 class="display">500 şarkı.</h2>
+    <div class="t5-controls">
+      <input type="search" id="t5q" placeholder="Şarkı, sanatçı ya da albüm ara…" aria-label="Listede ara" autocomplete="off">
+      <label>Keşfettiğim yıl
+        <select id="t5Year"><option value="">Hepsi</option></select>
+      </label>
+      <div class="seg" role="group" aria-label="Sıralama">
+        <button type="button" data-order="up" aria-pressed="true">1 → 500</button>
+        <button type="button" data-order="down" aria-pressed="false">Geri sayım</button>
+      </div>
+    </div>
+    <p class="t5-count" id="t5Count"></p>
+    <ol class="t5-list" id="t5List"><li class="t5-empty">Yükleniyor…</li></ol>
+    <div class="t5-back">
+      <a class="btn" href="../">13 yılımın özetine dön</a>
+      <a class="btn primary" href="../../">Kendi geçmişime bak</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Spotify'ın gönderdiği dinleme geçmişimden derlendi.</span>
+    <a class="top-link" href="../../">Sen de kendi geçmişine bak</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var nf = new Intl.NumberFormat("tr-TR");
+  var dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Istanbul" });
+  var yearFmt = new Intl.DateTimeFormat("tr-TR", { year: "numeric", timeZone: "Europe/Istanbul" });
+  var LINK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>';
+  var D = null, state = { q: "", year: "", artist: "", order: "up" };
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function norm(x) {
+    return String(x).toLocaleLowerCase("tr").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ı/g, "i");
+  }
+  // Turkish locative suffix for a year: 2015'te, 2016'da, 2020'de.
+  function yearIn(y) {
+    var last = y % 10, tens = Math.floor(y / 10) % 10;
+    if (last) return y + "'" + ["", "de", "de", "te", "te", "te", "da", "de", "de", "da"][last];
+    if (y % 100 === 0) return y + "'de";
+    return y + "'" + ["", "da", "de", "da", "ta", "de", "ta", "te", "de", "da"][tens];
+  }
+  function hoursText(ms) { return nf.format(Math.round(ms / 3.6e6)) + " saat"; }
+
+  // Plays per year, scaled to the song's own best year.
+  function spark(item) {
+    var max = Math.max.apply(null, item.y) || 1, w = 6, gap = 2, h = 28;
+    var bars = item.y.map(function (v, i) {
+      var bh = v ? Math.max(1.5, v / max * h) : 0;
+      return '<rect class="base" x="' + i * (w + gap) + '" y="' + (h - 1) + '" width="' + w + '" height="1"></rect>' +
+        '<rect x="' + i * (w + gap) + '" y="' + (h - bh).toFixed(1) + '" width="' + w + '" height="' + bh.toFixed(1) + '" rx="1"><title>' + D.years[i] + ': ' + v + ' kez</title></rect>';
+    }).join("");
+    return '<svg class="t5-spark" viewBox="0 0 ' + (item.y.length * (w + gap) - gap) + ' ' + h + '" preserveAspectRatio="none" role="img" aria-label="Yıllara göre dinlenme">' + bars + '</svg>';
+  }
+
+  function row(it) {
+    var peak = D.years[it.y.indexOf(Math.max.apply(null, it.y))];
+    var title = esc(it.t) + LINK;
+    var href = it.id ? "https://open.spotify.com/track/" + it.id : "";
+    return '<li class="t5-item' + (it.r <= 10 ? " big" : "") + '">' +
+      '<span class="t5-rank">' + it.r + '</span>' +
+      '<div class="t5-main">' +
+        (href ? '<a class="t5-title" href="' + href + '" target="_blank" rel="noopener">' + title + '</a>' : '<span class="t5-title">' + esc(it.t) + '</span>') +
+        '<div class="t5-sub"><button type="button" data-artist="' + esc(it.a) + '">' + esc(it.a) + '</button>' + (it.al ? ' · ' + esc(it.al) : "") + '</div>' +
+        '<div class="t5-meta">İlk kez ' + dateFmt.format(new Date(it.f * 1000)) + ' · en çok ' + yearIn(peak) + '</div>' +
+      '</div>' +
+      spark(it) +
+      '<div class="t5-plays"><b>' + nf.format(it.p) + '</b><span>kez</span></div>' +
+    '</li>';
+  }
+
+  function render() {
+    var q = norm(state.q.trim());
+    var list = D.items.filter(function (it) {
+      if (state.artist && it.a !== state.artist) return false;
+      if (state.year && it.fy !== state.year) return false;
+      if (q && it.fold.indexOf(q) < 0) return false;
+      return true;
+    });
+    if (state.order === "down") list = list.slice().reverse();
+    $("t5List").innerHTML = list.length ? list.map(row).join("") : '<li class="t5-empty">Bu aramayla eşleşen şarkı yok.</li>';
+    var filtered = list.length !== D.items.length;
+    $("t5Count").textContent = filtered ? nf.format(list.length) + " şarkı gösteriliyor" + (state.artist ? " · " + state.artist : "") : "";
+    document.querySelectorAll("#t5Artists .chip").forEach(function (c) {
+      c.setAttribute("aria-pressed", c.dataset.artist === state.artist ? "true" : "false");
+    });
+  }
+
+  function init(data) {
+    D = data;
+    var artists = new Map(), plays = 0, ms = 0, years = new Set();
+    D.items.forEach(function (it) {
+      it.fold = norm(it.t + " " + it.a + " " + it.al);
+      it.fy = yearFmt.format(new Date(it.f * 1000));
+      years.add(it.fy);
+      artists.set(it.a, (artists.get(it.a) || 0) + 1);
+      plays += it.p; ms += it.ms;
+    });
+    var stats = [
+      ["Şarkı", nf.format(D.items.length)],
+      ["Sanatçı", nf.format(artists.size)],
+      ["Toplam dinleme", nf.format(plays) + " kez"],
+      ["Toplam süre", hoursText(ms)]
+    ];
+    $("t5Stats").innerHTML = stats.map(function (s) {
+      return '<div class="stat"><div class="k">' + s[0] + '</div><div class="v">' + s[1] + '</div></div>';
+    }).join("");
+    $("t5Artists").innerHTML = Array.from(artists.entries())
+      .sort(function (a, b) { return b[1] - a[1] || a[0].localeCompare(b[0], "tr"); })
+      .slice(0, 24)
+      .map(function (e) {
+        return '<button type="button" class="chip" data-artist="' + esc(e[0]) + '" aria-pressed="false">' + esc(e[0]) + ' <small>' + e[1] + '</small></button>';
+      }).join("");
+    $("t5Year").insertAdjacentHTML("beforeend", Array.from(years).sort().map(function (y) {
+      return '<option value="' + y + '">' + y + '</option>';
+    }).join(""));
+    render();
+  }
+
+  var timer = 0;
+  $("t5q").addEventListener("input", function (e) {
+    clearTimeout(timer);
+    timer = setTimeout(function () { state.q = e.target.value; render(); }, 120);
+  });
+  $("t5Year").addEventListener("change", function (e) { state.year = e.target.value; render(); });
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest("[data-artist]");
+    if (a) {
+      state.artist = state.artist === a.dataset.artist ? "" : a.dataset.artist;
+      render();
+      $("list").scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    var o = e.target.closest("[data-order]");
+    if (o) {
+      state.order = o.dataset.order;
+      document.querySelectorAll("[data-order]").forEach(function (b) { b.setAttribute("aria-pressed", b === o ? "true" : "false"); });
+      render();
+    }
+  });
+
+  fetch("data.json")
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(init)
+    .catch(function () { $("t5List").innerHTML = '<li class="t5-empty">Liste yüklenemedi. Sayfayı yenilemeyi dene.</li>'; });
+})();
+</script>
+</body>
+</html>
