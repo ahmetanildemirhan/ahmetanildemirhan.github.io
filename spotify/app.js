@@ -14,12 +14,12 @@
   var CONFIG = window.SPOTIFY || {};
   var V = CONFIG.voice === "me" ? {
     listened: "dinledim", days: "Müzik dinlediğim gün", skips: "Atladığım şarkı", skipsD: "İlk 30 saniyede ileri geçtiklerim",
-    topA: "Bir numaralı sanatçım", topT: "Bir numaralı şarkım", first: "Kayıtlardaki ilk şarkım",
+    topA: "Bir numaralı sanatçım", topT: "Bir numaralı şarkım",
     night: "Gece kuşuyum.", morning: "Güne müzikle başlıyorum.", evening: "Akşamları açılıyorum.",
     peakH: "En yoğun saatim", peakD: "En çok dinlediğim gün"
   } : {
     listened: "dinledin", days: "Müzik dinlediğin gün", skips: "Atladığın şarkı", skipsD: "İlk 30 saniyede ileri geçtiklerin",
-    topA: "Bir numaralı sanatçın", topT: "Bir numaralı şarkın", first: "Kayıtlardaki ilk şarkın",
+    topA: "Bir numaralı sanatçın", topT: "Bir numaralı şarkın",
     night: "Gece kuşusun.", morning: "Güne müzikle başlıyorsun.", evening: "Akşamları açılıyorsun.",
     peakH: "En yoğun saatin", peakD: "En çok dinlediğin gün"
   };
@@ -283,7 +283,7 @@
     return {
       ms: A.ms, plays: A.plays, podMs: A.podMs, skips: A.skips, activeDays: A.activeDays,
       artistCount: A.artists.length, trackCount: A.tracks.length,
-      first: { t: A.first.t, track: A.first.track, artist: A.first.artist }, lastT: A.last.t,
+      first: { t: A.first.t }, lastT: A.last.t,
       y0: A.y0, m0: A.m0, months: A.months,
       artists: A.artists.slice(0, 25).map(function (a) { return { name: a.name, ms: a.ms }; }),
       tracks: A.tracks.slice(0, 25).map(function (t) { return { track: t.track, artist: t.artist, plays: t.plays, ms: t.ms }; }),
@@ -398,8 +398,6 @@
       return '<div class="stat"><div class="k">' + s[0] + '</div><div class="v' + (s[3] ? " sm" : "") + '">' + s[1] + '</div>' +
         (s[2] ? '<div class="d">' + s[2] + '</div>' : "") + '</div>';
     }).join("");
-    $("firstSong").innerHTML = '<div class="k">' + V.first + ' · ' + fmtDate(A.first.t) + '</div>' +
-      '<div class="v">' + esc(A.first.track) + ' <span class="muted">— ' + esc(A.first.artist) + '</span></div>';
 
     // Years
     var maxY = Math.max.apply(null, A.years.map(function (y) { return y.ms; }));

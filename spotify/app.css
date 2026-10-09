@@ -99,9 +99,6 @@ section.block .intro-text { color: var(--muted); margin-top: 10px; max-width: 60
 .stat .v { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -.03em; margin-top: 2px; overflow-wrap: anywhere; line-height: 1.15; }
 .stat .v.sm { font-size: 20px; }
 .stat .d { font-size: 14px; color: var(--muted); margin-top: 4px; overflow-wrap: anywhere; }
-.first-song { margin-top: 12px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
-.first-song .k { font-size: 13px; color: var(--muted); }
-.first-song .v { font-size: 19px; font-weight: 600; margin-top: 2px; overflow-wrap: anywhere; }
 
 .year-bars { display: flex; align-items: flex-end; gap: 6px; height: 200px; margin-top: 32px; padding-bottom: 26px; position: relative; }
 .year-bars button {
@@ -241,3 +238,4 @@ body.can-search .rank li[data-q]:hover .t { color: var(--accent); }
   .x-tops { grid-template-columns: 1fr; }
       .x-box { padding: 14px; }
 }
+.top500-link { margin-top: 20px; }
