@@ -11,6 +11,7 @@ Kişisel portfolyo sitesi. Tek sayfa, ek kurulum gerektirmez.
   - `spotify/ahmet/` — kendi 13 yılımın hazır özeti; veriler `spotify/ahmet/data.json` içinde.
     Yenilemek için: `spotify/` sayfasına yeni ZIP'i yükle, tarayıcı konsolunda
     `copy(SpotifyApp.exportSummary())` çalıştır ve çıkanı `data.json` dosyasına yapıştır.
+  - `app.js` / `app.css` değişince iki HTML dosyasındaki `?v=` numarasını da değiştir; yoksa tarayıcılar eski kodu yeni sayfayla karıştırabilir.
 - `404.html`, `sitemap.xml`, `robots.txt` — bulunamayan sayfa ve arama motoru ayarları
 
 ## Video eklemek / çıkarmak

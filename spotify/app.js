@@ -899,6 +899,7 @@
       return c;
     }
     function chips(id, items) {
+      if (!$(id)) return;
       $(id).innerHTML = items.map(function (it) {
         return '<button type="button" class="chip" data-v="' + it[0] + '" aria-pressed="false">' + esc(it[1]) +
           (it[2] !== undefined ? ' <small>' + nf.format(it[2]) + '</small>' : "") + '</button>';
@@ -928,6 +929,7 @@
 
     function picked(id) {
       var set = null;
+      if (!$(id)) return null;
       $(id).querySelectorAll('[aria-pressed="true"]').forEach(function (b) { (set = set || {})[b.dataset.v] = 1; });
       return set;
     }
