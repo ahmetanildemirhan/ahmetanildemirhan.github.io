@@ -33,7 +33,12 @@
     .seg { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2); }
     .seg button { border: none; background: none; padding: 7px 14px; border-radius: 999px; font-size: 14px; color: var(--muted); cursor: pointer; }
     .seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); font-weight: 600; }
-    .t5-count { font-size: 14px; color: var(--muted); margin-top: 14px; }
+    .t5-count { font-size: 14px; color: var(--muted); }
+    .t5-export { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-top: 16px; }
+    .t5-howto { margin-top: 14px; background: #10201a; border: 1px solid #1d3a2b; border-radius: 14px; padding: 16px 20px; font-size: 15px; }
+    .t5-howto ol { margin: 8px 0 0 20px; }
+    .t5-howto li { margin-top: 4px; }
+    .t5-howto p { color: var(--muted); font-size: 14px; margin-top: 8px; }
 
     .t5-list { list-style: none; margin-top: 8px; }
     .t5-item { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto 64px; gap: 4px 18px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
@@ -115,7 +120,19 @@
         <button type="button" data-order="down" aria-pressed="false">Geri sayım</button>
       </div>
     </div>
-    <p class="t5-count" id="t5Count"></p>
+    <div class="t5-export">
+      <button type="button" class="btn primary" id="t5Copy">Spotify çalma listesi yap</button>
+      <span class="t5-count" id="t5Count"></span>
+    </div>
+    <div class="t5-howto hidden" id="t5Howto" role="status">
+      <strong id="t5Copied"></strong>
+      <ol>
+        <li>Spotify'ı <b>bilgisayarda</b> aç (telefonda yapıştırma çalışmıyor).</li>
+        <li>Yeni bir çalma listesi oluştur, örneğin "Anıl — Top 500".</li>
+        <li>Listenin boş alanına bir kez tıkla ve yapıştır: Mac'te <b>Cmd + V</b>, Windows'ta <b>Ctrl + V</b>.</li>
+      </ol>
+      <p>Şarkılar sıralamadaki gibi eklenir. Aramayla ya da sanatçıyla süzdüysen sadece görünen şarkılar kopyalanır.</p>
+    </div>
     <ol class="t5-list" id="t5List"><li class="t5-empty">Yükleniyor…</li></ol>
     <div class="t5-back">
       <a class="btn" href="../">13 yılımın özetine dön</a>
@@ -185,6 +202,7 @@
     '</li>';
   }
 
+  var current = [];
   function render() {
     var q = norm(state.q.trim());
     var list = D.items.filter(function (it) {
@@ -194,6 +212,7 @@
       return true;
     });
     if (state.order === "down") list = list.slice().reverse();
+    current = list;
     $("t5List").innerHTML = list.length ? list.map(row).join("") : '<li class="t5-empty">Bu aramayla eşleşen şarkı yok.</li>';
     var filtered = list.length !== D.items.length;
     $("t5Count").textContent = filtered ? nf.format(list.length) + " şarkı gösteriliyor" + (state.artist ? " · " + state.artist : "") : "";
@@ -232,6 +251,30 @@
     }).join(""));
     render();
   }
+
+  // Spotify's desktop app turns pasted track links into playlist entries.
+  function copyLinks() {
+    var text = current.filter(function (it) { return it.id; })
+      .map(function (it) { return "https://open.spotify.com/track/" + it.id; }).join("\n");
+    var n = text ? text.split("\n").length : 0;
+    function done(ok) {
+      $("t5Howto").classList.remove("hidden");
+      $("t5Copied").textContent = ok ? nf.format(n) + " şarkının linki kopyalandı. Şimdi:" : "Kopyalanamadı; tarayıcın izin vermedi. Başka bir tarayıcıda dene.";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(fallback(text)); });
+    } else done(fallback(text));
+  }
+  function fallback(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    ta.remove();
+    return ok;
+  }
+  $("t5Copy").addEventListener("click", copyLinks);
 
   var timer = 0;
   $("t5q").addEventListener("input", function (e) {
